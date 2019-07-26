@@ -8,7 +8,6 @@ sealed class Tournament {
 
     companion object {
         fun createSingleElimination(playerNames: List<String>): Tournament {
-
             return SingleEliminationTournament.generateBrackets("A tournament", playerNames.shuffled())
         }
     }
@@ -43,18 +42,18 @@ class SingleEliminationTournament private constructor(
 
     override fun print() {
         println("Brackets for tournament: $name")
-        final.printRecursively()
+        final.printRecursively(0)
     }
 
 }
 
 sealed class Round {
-    abstract fun printRecursively()
+    abstract fun printRecursively(indentation: Int)
 }
 
-class SinglePlayerRound private constructor( private val player: Player) : Round() {
-    override fun printRecursively() {
-        println("${this.player}")
+class SinglePlayerRound private constructor(private val player: Player) : Round() {
+    override fun printRecursively(indentation: Int) {
+        indentAndPrintLine(indentation, "${this.player}")
     }
 
     companion object {
@@ -69,15 +68,15 @@ class RegularMatchRound private constructor(
         private val match: Match?,
         private val previous: Pair<Round, Round>?
 ) : Round() {
-    override fun printRecursively() {
+    override fun printRecursively(indentation: Int) {
         if (match != null) {
-            println("$match")
+            indentAndPrintLine(indentation, "$match")
         } else {
-            println("Winner between")
+            indentAndPrintLine(indentation, "Winner between")
         }
         if (previous != null) {
-            previous.first.printRecursively()
-            previous.second.printRecursively()
+            previous.first.printRecursively(indentation + 1)
+            previous.second.printRecursively(indentation + 1)
         }
     }
 
@@ -85,8 +84,16 @@ class RegularMatchRound private constructor(
         fun forPlayers(player1Name: String, player2Name: String): RegularMatchRound {
             return RegularMatchRound(Match.between(player1Name, player2Name), null)
         }
+
         fun generatedBy(round1: Round, round2: Round): RegularMatchRound {
             return RegularMatchRound(null, Pair(round1, round2))
         }
     }
+}
+
+fun indentAndPrintLine(indentation: Int, message: String) {
+    for (i in 1 .. indentation)
+        print("--")
+    print(message)
+    print('\n')
 }
