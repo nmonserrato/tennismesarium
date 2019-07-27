@@ -1,9 +1,8 @@
-package dev.paloma.tennismesarium.tournament
+package dev.paloma.tennismesarium.tournament.printing
 
+import dev.paloma.tennismesarium.tournament.Round
 import java.io.IOException
-import java.io.OutputStreamWriter
 import java.io.PrintStream
-import java.io.PrintWriter
 
 class SingleEliminationTournamentPrinter2 {
     @Throws(IOException::class)

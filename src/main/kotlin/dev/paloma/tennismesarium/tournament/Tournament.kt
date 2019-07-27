@@ -2,6 +2,7 @@ package dev.paloma.tennismesarium.tournament
 
 import dev.paloma.tennismesarium.match.Match
 import dev.paloma.tennismesarium.match.Player
+import dev.paloma.tennismesarium.tournament.printing.SingleEliminationTournamentPrinter2
 
 sealed class Tournament {
     abstract fun print()
@@ -46,7 +47,7 @@ class SingleEliminationTournament private constructor(
 }
 
 sealed class Round {
-    //TODO remove?
+    //TODO these are here only for printing. Remove?
     abstract fun getLeft(): Round?
     abstract fun getRight(): Round?
 }
