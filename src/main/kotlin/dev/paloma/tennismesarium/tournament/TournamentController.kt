@@ -1,5 +1,6 @@
 package dev.paloma.tennismesarium.tournament
 
+import dev.paloma.tennismesarium.match.Match
 import dev.paloma.tennismesarium.player.PlayersRepository
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -40,9 +41,11 @@ class TournamentInformationController {
     }
 
     @GetMapping("{tournamentId}/availableMatches")
-    fun availableMatches(@PathVariable("tournamentId") tournamentId: UUID): ResponseEntity<List<String>> {
+    fun availableMatches(@PathVariable("tournamentId") tournamentId: UUID): ResponseEntity<List<Any>> {
         logger.info("Requested available matches for tournament {}", tournamentId)
-        return ResponseEntity.ok(emptyList())
+        val tournament = tournamentRepository.find(tournamentId) ?: return ResponseEntity.notFound().build()
+        val availableMatches = tournament.findNextPlayableMatches().map(Match::basicInfo)
+        return ResponseEntity.ok(availableMatches)
     }
 }
 

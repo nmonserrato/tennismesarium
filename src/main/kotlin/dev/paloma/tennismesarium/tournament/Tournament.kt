@@ -6,10 +6,12 @@ import dev.paloma.tennismesarium.tournament.printing.SingleEliminationTournament
 import java.io.ByteArrayOutputStream
 import java.io.PrintStream
 import java.util.*
+import kotlin.collections.ArrayList
 
 sealed class Tournament {
     abstract fun printBrackets(): String
     abstract fun identifier(): UUID
+    abstract fun findNextPlayableMatches(): List<Match>
 
     companion object {
         fun createSingleElimination(tournamentName: String, players: List<Player>): Tournament {
@@ -47,6 +49,8 @@ class SingleEliminationTournament private constructor(
 
     override fun identifier() = id
 
+    override fun findNextPlayableMatches(): List<Match> = final.findPlayableMatches()
+
     override fun printBrackets(): String {
         val stream = ByteArrayOutputStream()
         PrintStream(stream, true, "UTF-8")
@@ -63,6 +67,8 @@ sealed class Round {
     abstract fun getLeft(): Round?
 
     abstract fun getRight(): Round?
+
+    abstract fun findPlayableMatches(): List<Match>
 }
 
 class SinglePlayerRound private constructor(private val player: Player) : Round() {
@@ -73,8 +79,9 @@ class SinglePlayerRound private constructor(private val player: Player) : Round(
     }
 
     override fun getLeft(): Round? = null
-
     override fun getRight(): Round? = null
+
+    override fun findPlayableMatches(): List<Match> = emptyList()
 
     override fun toString(): String {
         return "$player"
@@ -97,8 +104,15 @@ class RegularMatchRound private constructor(
     }
 
     override fun getLeft(): Round? = previous?.first
-
     override fun getRight(): Round? = previous?.second
+
+    override fun findPlayableMatches(): List<Match> {
+        val matches = ArrayList<Match>()
+        previous?.first?.findPlayableMatches()?.forEach { matches.add(it) }
+        if (match?.canBePlayed() == true) matches.add(match)
+        previous?.second?.findPlayableMatches()?.forEach { matches.add(it) }
+        return matches
+    }
 
     override fun toString(): String {
         return if (match != null) "$match"
