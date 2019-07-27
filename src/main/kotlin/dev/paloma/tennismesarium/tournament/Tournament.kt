@@ -17,7 +17,6 @@ class SingleEliminationTournament private constructor(
         private val name: String,
         private val final: Round
 ) : Tournament() {
-
     companion object {
         fun generateBrackets(tournamentName: String, playerNames: List<String>): SingleEliminationTournament {
             assert(playerNames.isNotEmpty())
@@ -42,24 +41,29 @@ class SingleEliminationTournament private constructor(
 
     override fun print() {
         println("Brackets for tournament: $name")
-        final.printRecursively(0)
+        SingleEliminationTournamentPrinter2().print(final, System.out)
     }
-
 }
 
 sealed class Round {
-    abstract fun printRecursively(indentation: Int)
+    //TODO remove?
+    abstract fun getLeft(): Round?
+    abstract fun getRight(): Round?
 }
 
 class SinglePlayerRound private constructor(private val player: Player) : Round() {
-    override fun printRecursively(indentation: Int) {
-        indentAndPrintLine(indentation, "${this.player}")
-    }
-
     companion object {
         fun forPlayer(name: String): SinglePlayerRound {
             return SinglePlayerRound(Player(name))
         }
+    }
+
+    override fun getLeft(): Round? = null
+
+    override fun getRight(): Round? = null
+
+    override fun toString(): String {
+        return "$player"
     }
 }
 
@@ -68,18 +72,6 @@ class RegularMatchRound private constructor(
         private val match: Match?,
         private val previous: Pair<Round, Round>?
 ) : Round() {
-    override fun printRecursively(indentation: Int) {
-        if (match != null) {
-            indentAndPrintLine(indentation, "$match")
-        } else {
-            indentAndPrintLine(indentation, "Winner between")
-        }
-        if (previous != null) {
-            previous.first.printRecursively(indentation + 1)
-            previous.second.printRecursively(indentation + 1)
-        }
-    }
-
     companion object {
         fun forPlayers(player1Name: String, player2Name: String): RegularMatchRound {
             return RegularMatchRound(Match.between(player1Name, player2Name), null)
@@ -89,11 +81,13 @@ class RegularMatchRound private constructor(
             return RegularMatchRound(null, Pair(round1, round2))
         }
     }
-}
 
-fun indentAndPrintLine(indentation: Int, message: String) {
-    for (i in 1 .. indentation)
-        print("--")
-    print(message)
-    print('\n')
+    override fun getLeft(): Round? = previous?.first
+
+    override fun getRight(): Round? = previous?.second
+
+    override fun toString(): String {
+        return if (match != null) "$match"
+        else "TBD"
+    }
 }
