@@ -7,8 +7,7 @@ sealed class Match(
         private val id: UUID,
         private val games: List<Game>?
 ) {
-    abstract fun canBePlayed(): Boolean
-    abstract fun basicInfo(): Map<String, String>
+    abstract fun toJson(): Map<String, Any>
 
     companion object {
         fun between(player1: Player, player2: Player): Match {
@@ -32,11 +31,14 @@ class SinglesMatch(
         return "${players.first} - ${players.second}"
     }
 
-    override fun canBePlayed(): Boolean = games.isEmpty()
+    override fun toJson(): Map<String, Any> {
+        val output = LinkedHashMap<String, Any>()
+        output["id"] = id.toString()
+        output["players"] = listOf(players.first.toString(), players.second.toString())
+        output["canBePlayed"] = canBePlayed()
+        //TODO add results if available
+        return output
+    }
 
-    override fun basicInfo(): Map<String, String> = mapOf(
-            "identifier" to id.toString(),
-            "player1" to players.first.toString(),
-            "player2" to players.second.toString()
-    )
+    private fun canBePlayed(): Boolean = games.isEmpty()
 }

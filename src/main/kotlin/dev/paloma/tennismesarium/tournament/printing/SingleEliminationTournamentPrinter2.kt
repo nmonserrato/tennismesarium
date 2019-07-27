@@ -5,6 +5,7 @@ import java.io.IOException
 import java.io.PrintStream
 
 class SingleEliminationTournamentPrinter2 {
+    /*
     @Throws(IOException::class)
     fun print(root: Round, out: PrintStream) {
         val right = root.getRight()
@@ -54,4 +55,5 @@ class SingleEliminationTournamentPrinter2 {
             printTree(left, out, false, indent + if (isRight) " |      " else "        ")
         }
     }
+    */
 }

@@ -7,6 +7,7 @@ import kotlin.math.floor
 
 class SingleEliminationTournamentPrinter {
     fun print(root: Round) {
+        /*
         val lines = ArrayList<List<String?>>()
 
         var level: MutableList<Round?> = ArrayList()
@@ -110,5 +111,6 @@ class SingleEliminationTournamentPrinter {
 
             perpiece /= 2
         }
+        */
     }
 }
