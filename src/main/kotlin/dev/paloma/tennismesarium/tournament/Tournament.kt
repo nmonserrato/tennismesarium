@@ -3,18 +3,23 @@ package dev.paloma.tennismesarium.tournament
 import dev.paloma.tennismesarium.match.Match
 import dev.paloma.tennismesarium.match.Player
 import dev.paloma.tennismesarium.tournament.printing.SingleEliminationTournamentPrinter2
+import java.io.ByteArrayOutputStream
+import java.io.PrintStream
+import java.util.*
 
 sealed class Tournament {
-    abstract fun print()
+    abstract fun printBrackets(): String
+    abstract fun identifier(): UUID
 
     companion object {
-        fun createSingleElimination(playerNames: List<String>): Tournament {
-            return SingleEliminationTournament.generateBrackets("A tournament", playerNames.shuffled())
+        fun createSingleElimination(tournamentName: String, playerNames: List<String>): Tournament {
+            return SingleEliminationTournament.generateBrackets(tournamentName, playerNames.shuffled())
         }
     }
 }
 
 class SingleEliminationTournament private constructor(
+        private val id: UUID,
         private val name: String,
         private val final: Round
 ) : Tournament() {
@@ -22,7 +27,7 @@ class SingleEliminationTournament private constructor(
         fun generateBrackets(tournamentName: String, playerNames: List<String>): SingleEliminationTournament {
             assert(playerNames.isNotEmpty())
             assert(tournamentName.isNotBlank())
-            return SingleEliminationTournament(tournamentName, generateRound(playerNames))
+            return SingleEliminationTournament(UUID.randomUUID(), tournamentName, generateRound(playerNames))
         }
 
         private fun generateRound(playerNames: List<String>): Round {
@@ -40,15 +45,23 @@ class SingleEliminationTournament private constructor(
         }
     }
 
-    override fun print() {
-        println("Brackets for tournament: $name")
-        SingleEliminationTournamentPrinter2().print(final, System.out)
+    override fun identifier() = id
+
+    override fun printBrackets(): String {
+        val stream = ByteArrayOutputStream()
+        PrintStream(stream, true, "UTF-8")
+                .use {
+                    it.println("Brackets for tournament: $name")
+                    SingleEliminationTournamentPrinter2().print(final, it)
+                }
+        return String(stream.toByteArray())
     }
 }
 
 sealed class Round {
     //TODO these are here only for printing. Remove?
     abstract fun getLeft(): Round?
+
     abstract fun getRight(): Round?
 }
 
