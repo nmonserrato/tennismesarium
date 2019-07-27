@@ -1,7 +1,9 @@
-package dev.paloma.tennismesarium.tournament.information
+package dev.paloma.tennismesarium.tournament
 
-import dev.paloma.tennismesarium.tournament.Tournament
+import dev.paloma.tennismesarium.player.PlayersRepository
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import java.util.*
@@ -14,28 +16,33 @@ class TournamentInformationController {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
+    @Autowired
+    private lateinit var playersRepository: PlayersRepository
+
+    @Autowired
+    private lateinit var tournamentRepository: TournamentRepository
+
     @PostMapping
     fun createTournament(@RequestBody @Validated request: TournamentCreationRequest): UUID {
         logger.info("Requested to create tournament with name {} and players {}",
                 request.tournamentName, request.playerNames)
-        val tournament = Tournament.createSingleElimination(request.tournamentName, request.playerNames)
+        val players = playersRepository.createAll(request.playerNames)
+        val tournament = Tournament.createSingleElimination(request.tournamentName, players)
+        tournamentRepository.store(tournament)
         return tournament.identifier()
     }
 
     @GetMapping("{tournamentId}/brackets")
-    fun getBrackets(@PathVariable("tournamentId") tournamentId: UUID): String {
+    fun getBrackets(@PathVariable("tournamentId") tournamentId: UUID): ResponseEntity<String> {
         logger.info("Requested brackets for tournament {}", tournamentId)
-        val tournament = Tournament.createSingleElimination(
-                "TomokiCup1",
-                listOf("Sergio", "Miquel", "Arjen", "Olivier", "Laia", "Juana", "Nino", "Diego", "Germanno")
-        )
-        return tournament.printBrackets()
+        val tournament = tournamentRepository.find(tournamentId) ?: return ResponseEntity.notFound().build()
+        return ResponseEntity.ok(tournament.printBrackets())
     }
 
     @GetMapping("{tournamentId}/availableMatches")
-    fun availableMatches(@PathVariable("tournamentId") tournamentId: UUID): List<String> {
+    fun availableMatches(@PathVariable("tournamentId") tournamentId: UUID): ResponseEntity<List<String>> {
         logger.info("Requested available matches for tournament {}", tournamentId)
-        return emptyList()
+        return ResponseEntity.ok(emptyList())
     }
 }
 

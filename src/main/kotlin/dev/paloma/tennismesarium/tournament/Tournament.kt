@@ -1,7 +1,7 @@
 package dev.paloma.tennismesarium.tournament
 
 import dev.paloma.tennismesarium.match.Match
-import dev.paloma.tennismesarium.match.Player
+import dev.paloma.tennismesarium.player.Player
 import dev.paloma.tennismesarium.tournament.printing.SingleEliminationTournamentPrinter2
 import java.io.ByteArrayOutputStream
 import java.io.PrintStream
@@ -12,8 +12,8 @@ sealed class Tournament {
     abstract fun identifier(): UUID
 
     companion object {
-        fun createSingleElimination(tournamentName: String, playerNames: List<String>): Tournament {
-            return SingleEliminationTournament.generateBrackets(tournamentName, playerNames.shuffled())
+        fun createSingleElimination(tournamentName: String, players: List<Player>): Tournament {
+            return SingleEliminationTournament.generateBrackets(tournamentName, players.shuffled())
         }
     }
 }
@@ -24,20 +24,20 @@ class SingleEliminationTournament private constructor(
         private val final: Round
 ) : Tournament() {
     companion object {
-        fun generateBrackets(tournamentName: String, playerNames: List<String>): SingleEliminationTournament {
-            assert(playerNames.isNotEmpty())
+        fun generateBrackets(tournamentName: String, players: List<Player>): SingleEliminationTournament {
+            assert(players.isNotEmpty())
             assert(tournamentName.isNotBlank())
-            return SingleEliminationTournament(UUID.randomUUID(), tournamentName, generateRound(playerNames))
+            return SingleEliminationTournament(UUID.randomUUID(), tournamentName, generateRound(players))
         }
 
-        private fun generateRound(playerNames: List<String>): Round {
+        private fun generateRound(players: List<Player>): Round {
             return when {
-                playerNames.size == 1 -> SinglePlayerRound.forPlayer(playerNames[0])
-                playerNames.size == 2 -> RegularMatchRound.forPlayers(playerNames[0], playerNames[1])
+                players.size == 1 -> SinglePlayerRound.forPlayer(players[0])
+                players.size == 2 -> RegularMatchRound.forPlayers(players[0], players[1])
                 else -> {
-                    val halfIndex = playerNames.size / 2
-                    val half1 = playerNames.subList(0, halfIndex)
-                    val half2 = playerNames.subList(halfIndex, playerNames.size)
+                    val halfIndex = players.size / 2
+                    val half1 = players.subList(0, halfIndex)
+                    val half2 = players.subList(halfIndex, players.size)
                     RegularMatchRound.generatedBy(generateRound(half1), generateRound(half2))
                 }
             }
@@ -67,8 +67,8 @@ sealed class Round {
 
 class SinglePlayerRound private constructor(private val player: Player) : Round() {
     companion object {
-        fun forPlayer(name: String): SinglePlayerRound {
-            return SinglePlayerRound(Player(name))
+        fun forPlayer(player: Player): SinglePlayerRound {
+            return SinglePlayerRound(player)
         }
     }
 
@@ -87,8 +87,8 @@ class RegularMatchRound private constructor(
         private val previous: Pair<Round, Round>?
 ) : Round() {
     companion object {
-        fun forPlayers(player1Name: String, player2Name: String): RegularMatchRound {
-            return RegularMatchRound(Match.between(player1Name, player2Name), null)
+        fun forPlayers(player1: Player, player2: Player): RegularMatchRound {
+            return RegularMatchRound(Match.between(player1, player2), null)
         }
 
         fun generatedBy(round1: Round, round2: Round): RegularMatchRound {
