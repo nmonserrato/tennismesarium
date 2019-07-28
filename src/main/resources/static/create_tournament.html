@@ -36,11 +36,9 @@ Germanno</textarea>
         url: "/api/tournament",
         data: JSON.stringify(postData),
         complete: function (request, textStatus) {
-            console.log('success '+request);
             var location = request.getResponseHeader('location');
             console.log('location '+location);
             var tournamentId = location.substring(location.lastIndexOf('/')+1);
-            console.log('tournamentId '+tournamentId);
             window.location.href = '/tournament.html?id='+tournamentId;
         },
         contentType: "application/json; charset=utf-8",

@@ -5,7 +5,8 @@
     <title>Tournament details - Tennismesarium</title>
 </head>
 <body>
-    <h1>Tournament details</h1>
+    <h1 id="tournamentNameLabel"></h1>
+    <input type="hidden" id="tournamentIdInput" />
 
 
 <script src="https://code.jquery.com/jquery-3.4.1.min.js"
@@ -13,6 +14,17 @@
         crossorigin="anonymous"></script>
 
 <script type="application/javascript">
+    function urlParam(name){
+       if(name=(new RegExp('[?&]'+encodeURIComponent(name)+'=([^&]*)')).exec(location.search))
+          return decodeURIComponent(name[1]);
+    }
+    var tournamentId = urlParam("id")
+    console.log('reading tournament details '+tournamentId);
+    $.getJSON( "/api/tournament/"+tournamentId, function( data ) {
+        document.getElementById("tournamentNameLabel").innerHTML = data.name;
+        document.getElementById("tournamentIdInput").value = data.id;
+        console.log(data);
+    });
 </script>
 </body>
 </html>
