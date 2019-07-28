@@ -13,7 +13,7 @@ import javax.validation.constraints.Size
 
 @RestController
 @RequestMapping("/api/tournament")
-class TournamentInformationController {
+class TournamentController {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create a tournament - Tennismesarium</title>
+</head>
+<body>
+    <h1>Welcome! Let's create a tournament!</h1>
+
+    <h3>Tournament name</h3> <br/>
+    <input type="text" id="tournamentNameInput" value="Tomoki Cup"/>
+    <br/> <br/>
+    <h3>List of players (one per line)</h3>
+    <textarea rows="20" cols="20" id="playersInput">Sergio
+Miquel
+Arjen
+Olivier
+Laia
+Juana
+Nino
+Diego
+Germanno</textarea>
+    <br/> <br/>
+    <button onclick="createTournament()">Create</button>
+
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"
+        integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+        crossorigin="anonymous"></script>
+<script type="application/javascript">
+    function createTournament() {
+        var tournamentName = document.getElementById("tournamentNameInput").value
+        var playersLines = document.getElementById("playersInput").value.split("\n")
+        var postData = { "tournamentName": tournamentName, "playerNames": playersLines };
+        $.ajax({
+        type: "POST",
+        url: "/api/tournament",
+        data: JSON.stringify(postData),
+        complete: function (request, textStatus) {
+            console.log('success '+request);
+            var location = request.getResponseHeader('location');
+            console.log('location '+location);
+            var tournamentId = location.substring(location.lastIndexOf('/')+1);
+            console.log('tournamentId '+tournamentId);
+            window.location.href = '/tournament.html?id='+tournamentId;
+        },
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        traditional: true
+    });
+    }
+
+</script>
+</body>
+</html>
