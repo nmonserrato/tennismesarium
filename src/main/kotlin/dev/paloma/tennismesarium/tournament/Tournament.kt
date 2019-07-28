@@ -58,6 +58,7 @@ class SingleEliminationTournament private constructor(
         val output = LinkedHashMap<String, Any>()
         output["id"] = id.toString()
         output["name"] = name
+        if(final.isCompleted()) output["winner"] = final.winner().toJson()
         output["finalRound"] = final.toJson()
         return output
     }

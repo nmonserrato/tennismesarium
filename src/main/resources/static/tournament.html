@@ -7,6 +7,7 @@
 </head>
 <body>
     <h1 id="tournamentNameLabel"></h1>
+    <h1 id="tournamentWinnerName"></h1>
     <input type="hidden" id="tournamentIdInput" />
     <br /><br />
 
@@ -81,6 +82,10 @@
             $('#tournamentTreeDiv').append(
                 $('<ul>').append(roundToLi(data.finalRound))
             );
+
+            if (typeof data.winner !== 'undefined') {
+                $('#tournamentWinnerName').html("Winner: "+data.winner.name);
+            }
         });
     }
 
