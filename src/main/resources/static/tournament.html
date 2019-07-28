@@ -23,12 +23,39 @@
           return decodeURIComponent(name[1]);
     }
 
-    function roundToLi(roundData){
+    function submitMatchResult(matchId, winnerId, playerName) {
+        if(confirm("Do you confirm that "+playerName+" won the match?")) {
+            var tournamentId = document.getElementById("tournamentIdInput").value;
+            var postData = { "tournamentId" : tournamentId, "winnerId": winnerId}
+            $.ajax({
+                type: "PUT",
+                url: "/api/match/"+matchId,
+                data: JSON.stringify(postData),
+                complete: function (request, textStatus) {
+                    reloadTree();
+                },
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                traditional: true
+            });
+        }
+    }
+
+    function roundToLi(roundData) {
         var nodeText = '------';
-        if (roundData.type === 'SINGLE_PLAYER')
+        if (roundData.type === 'SINGLE_PLAYER') {
             nodeText = roundData.player
-        else if (roundData.type === 'ELIMINATION_ROUND' && typeof roundData.match !== 'undefined')
-            nodeText = roundData.match.players[0].name+' vs '+roundData.match.players[1].name
+        } else if (roundData.type === 'ELIMINATION_ROUND' && typeof roundData.match !== 'undefined') {
+            var match = roundData.match;
+            var p1 = match.players[0];
+            var p2 = match.players[1];
+            if (match.canBePlayed) {
+                nodeText = '<a href="#" onclick="submitMatchResult(\''+match.id+'\',\''+p1.id+'\',\''+p1.name+'\');return false;">'+p1.name+'</a> vs '+
+                           '<a href="#" onclick="submitMatchResult(\''+match.id+'\',\''+p2.id+'\',\''+p2.name+'\');return false;">'+p2.name+'</a>';
+            } else {
+                nodeText = p1.name +' vs '+ p2.name
+            }
+        }
 
         var mainLi = $('<li>').append($('<div>').append(nodeText))
         var children = roundData.previous;
@@ -44,15 +71,20 @@
         return mainLi;
     }
 
-    var tournamentId = urlParam("id")
-    $.getJSON( "/api/tournament/"+tournamentId, function( data ) {
-        document.getElementById("tournamentNameLabel").innerHTML = data.name;
-        document.getElementById("tournamentIdInput").value = data.id;
+    function reloadTree() {
+        var tournamentId = urlParam("id")
+        $.getJSON( "/api/tournament/"+tournamentId, function( data ) {
+            $('#tournamentNameLabel').html(data.name);
+            $('#tournamentIdInput').val(data.id);
 
-        $('#tournamentTreeDiv').append(
-            $('<ul>').append(roundToLi(data.finalRound))
-        );
-    });
+            $('#tournamentTreeDiv').empty();
+            $('#tournamentTreeDiv').append(
+                $('<ul>').append(roundToLi(data.finalRound))
+            );
+        });
+    }
+
+    reloadTree();
 </script>
 </body
 </html>

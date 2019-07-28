@@ -32,19 +32,19 @@ Germanno</textarea>
         var playersLines = document.getElementById("playersInput").value.split("\n")
         var postData = { "tournamentName": tournamentName, "playerNames": playersLines };
         $.ajax({
-        type: "POST",
-        url: "/api/tournament",
-        data: JSON.stringify(postData),
-        complete: function (request, textStatus) {
-            var location = request.getResponseHeader('location');
-            console.log('location '+location);
-            var tournamentId = location.substring(location.lastIndexOf('/')+1);
-            window.location.href = '/tournament.html?id='+tournamentId;
-        },
-        contentType: "application/json; charset=utf-8",
-        dataType: "json",
-        traditional: true
-    });
+            type: "POST",
+            url: "/api/tournament",
+            data: JSON.stringify(postData),
+            complete: function (request, textStatus) {
+                var location = request.getResponseHeader('location');
+                console.log('location '+location);
+                var tournamentId = location.substring(location.lastIndexOf('/')+1);
+                window.location.href = '/tournament.html?id='+tournamentId;
+            },
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            traditional: true
+        });
     }
 
 </script>
