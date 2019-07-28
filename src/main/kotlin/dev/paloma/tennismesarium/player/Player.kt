@@ -9,4 +9,8 @@ class Player(
     override fun toString(): String {
         return name
     }
+
+    fun toJson(): Map<String, String> {
+        return mapOf("id" to id.toString(), "name" to name)
+    }
 }
