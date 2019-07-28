@@ -3,11 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <title>Tournament details - Tennismesarium</title>
+    <link rel="stylesheet" href="tree.css">
 </head>
 <body>
     <h1 id="tournamentNameLabel"></h1>
     <input type="hidden" id="tournamentIdInput" />
+    <br /><br />
 
+    <div class="tree" id="tournamentTreeDiv">
+    </div>
 
 <script src="https://code.jquery.com/jquery-3.4.1.min.js"
         integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
@@ -18,13 +22,37 @@
        if(name=(new RegExp('[?&]'+encodeURIComponent(name)+'=([^&]*)')).exec(location.search))
           return decodeURIComponent(name[1]);
     }
+
+    function roundToLi(roundData){
+        var nodeText = '------';
+        if (roundData.type === 'SINGLE_PLAYER')
+            nodeText = roundData.player
+        else if (roundData.type === 'ELIMINATION_ROUND' && typeof roundData.match !== 'undefined')
+            nodeText = roundData.match.players[0].name+' vs '+roundData.match.players[1].name
+
+        var mainLi = $('<li>').append($('<div>').append(nodeText))
+        var children = roundData.previous;
+
+        if (typeof children !== 'undefined' && children.length > 0) {
+            var childrenUl = $('<ul>')
+            var i;
+            for (i = 0; i < children.length; i++) {
+                childrenUl.append(roundToLi(children[i]));
+            }
+            mainLi.append(childrenUl);
+        }
+        return mainLi;
+    }
+
     var tournamentId = urlParam("id")
-    console.log('reading tournament details '+tournamentId);
     $.getJSON( "/api/tournament/"+tournamentId, function( data ) {
         document.getElementById("tournamentNameLabel").innerHTML = data.name;
         document.getElementById("tournamentIdInput").value = data.id;
-        console.log(data);
+
+        $('#tournamentTreeDiv').append(
+            $('<ul>').append(roundToLi(data.finalRound))
+        );
     });
 </script>
-</body>
+</body
 </html>
