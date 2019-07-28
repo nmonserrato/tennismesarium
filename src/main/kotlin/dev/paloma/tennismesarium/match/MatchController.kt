@@ -5,10 +5,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import java.util.*
 import javax.validation.constraints.NotNull
 
@@ -21,15 +18,20 @@ class MatchController {
     @Autowired
     private lateinit var tournamentRepository: TournamentRepository
 
-    @PutMapping
-    fun completeMatch(@RequestBody @Validated request: MatchCompletionRequest): ResponseEntity<Unit> {
-        logger.info("Requested to complete match {} with winner {}", request.matchId, request.winnerId)
-        //TODO implement
+    @PutMapping("{matchId}")
+    fun completeMatch(
+            @PathVariable("matchId") matchId: UUID,
+            @RequestBody @Validated request: MatchCompletionRequest
+    ): ResponseEntity<Unit> {
+        logger.info("Requested to complete match {} of tournament {} with winner {}",
+                matchId, request.tournamentId, request.winnerId)
+        val tournament = tournamentRepository.find(request.tournamentId) ?: return ResponseEntity.notFound().build()
+        tournament.completeMatch(matchId, request.winnerId)
         return ResponseEntity.accepted().build()
     }
 }
 
 data class MatchCompletionRequest(
-        @NotNull val matchId: UUID,
+        @NotNull val tournamentId: UUID,
         @NotNull val winnerId: UUID
 )

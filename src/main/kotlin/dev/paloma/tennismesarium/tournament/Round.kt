@@ -2,9 +2,17 @@ package dev.paloma.tennismesarium.tournament
 
 import dev.paloma.tennismesarium.match.Match
 import dev.paloma.tennismesarium.player.Player
+import java.lang.IllegalStateException
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.LinkedHashMap
 
 sealed class Round {
     abstract fun toJson(): Map<String, Any>
+    abstract fun findMatch(matchId: UUID): Match?
+    abstract fun onMatchCompleted(matchId: UUID)
+    abstract fun isCompleted(): Boolean
+    abstract fun winner(): Player
 }
 
 class SinglePlayerRound private constructor(private val player: Player) : Round() {
@@ -13,6 +21,14 @@ class SinglePlayerRound private constructor(private val player: Player) : Round(
             return SinglePlayerRound(player)
         }
     }
+
+    override fun findMatch(matchId: UUID): Match? = null
+
+    override fun isCompleted() = true
+
+    override fun onMatchCompleted(matchId: UUID) {}
+
+    override fun winner() = player
 
     override fun toJson(): Map<String, Any> {
         val output = LinkedHashMap<String, Any>()
@@ -26,9 +42,8 @@ class SinglePlayerRound private constructor(private val player: Player) : Round(
     }
 }
 
-
 class RegularMatchRound private constructor(
-        private val match: Match?,
+        private var match: Match?,
         private val previous: Pair<Round, Round>?
 ) : Round() {
     companion object {
@@ -41,6 +56,33 @@ class RegularMatchRound private constructor(
         }
     }
 
+    override fun findMatch(matchId: UUID): Match? {
+        if (matchId == match?.identifier())
+            return match
+
+        previous?.first?.findMatch(matchId)?.let { return it }
+        previous?.second?.findMatch(matchId)?.let { return it }
+
+        return null
+    }
+
+    override fun isCompleted() = match?.isCompleted() == true
+
+    override fun winner() = match?.winner() ?: throw IllegalStateException("Round is not complete yet")
+
+    override fun onMatchCompleted(matchId: UUID) {
+        if (match != null) return
+
+        if (previous?.first?.isCompleted() == true && previous.second.isCompleted()) {
+            match = Match.between(previous.first.winner(), previous.second.winner())
+        }
+
+        previous?.first?.onMatchCompleted(matchId)
+        previous?.second?.onMatchCompleted(matchId)
+
+        return
+    }
+
     override fun toJson(): Map<String, Any> {
         val previousRounds = ArrayList<Any>(2)
         previous?.first?.let { previousRounds.add(it.toJson()) }
@@ -48,8 +90,8 @@ class RegularMatchRound private constructor(
 
         val output = LinkedHashMap<String, Any>()
         output["type"] = "ELIMINATION_ROUND"
-        output["previous"] = previousRounds
         match?.let { output["match"] = it.toJson() }
+        output["previous"] = previousRounds
         return output
     }
 

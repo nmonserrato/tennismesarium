@@ -10,6 +10,8 @@ class Player(
         return name
     }
 
+    fun identifier() = id
+
     fun toJson(): Map<String, String> {
         return mapOf("id" to id.toString(), "name" to name)
     }

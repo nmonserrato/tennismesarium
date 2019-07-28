@@ -1,12 +1,15 @@
 package dev.paloma.tennismesarium.tournament
 
+import dev.paloma.tennismesarium.match.Match
 import dev.paloma.tennismesarium.player.Player
+import java.lang.IllegalArgumentException
 import java.util.*
 import kotlin.collections.LinkedHashMap
 
 sealed class Tournament {
-    abstract fun toJson(): Map<String, Any>
     abstract fun identifier(): UUID
+    abstract fun completeMatch(matchId: UUID, winnerId: UUID)
+    abstract fun toJson(): Map<String, Any>
 
     companion object {
         fun createSingleElimination(tournamentName: String, players: List<Player>): Tournament {
@@ -44,6 +47,13 @@ class SingleEliminationTournament private constructor(
 
     override fun identifier() = id
 
+    override fun completeMatch(matchId: UUID, winnerId: UUID) {
+        val match = findPlayableMatch(matchId)
+                ?: throw IllegalArgumentException("No match $matchId found in tournament")
+        match.complete(winnerId)
+        final.onMatchCompleted(matchId)
+    }
+
     override fun toJson(): Map<String, Any> {
         val output = LinkedHashMap<String, Any>()
         output["id"] = id.toString()
@@ -51,4 +61,7 @@ class SingleEliminationTournament private constructor(
         output["finalRound"] = final.toJson()
         return output
     }
+
+    private fun findPlayableMatch(matchId: UUID): Match? = final.findMatch(matchId)
+
 }
