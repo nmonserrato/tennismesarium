@@ -1,16 +1,23 @@
 package dev.paloma.tennismesarium
 
+import dev.paloma.tennismesarium.player.InMemoryPlayersRepository
+import dev.paloma.tennismesarium.tournament.SingleEliminationTournament
+import dev.paloma.tennismesarium.tournament.Tournament
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.junit4.SpringRunner
 
-@RunWith(SpringRunner::class)
-@SpringBootTest
+
 class TennismesariumApplicationTests {
 
 	@Test
-	fun contextLoads() {
+	fun `serialize tournament`() {
+		val players = InMemoryPlayersRepository().createAll(listOf("A", "B", "C", "d", "e", "f", "g", "h", "i"))
+		val tournament = Tournament.createSingleElimination("Tomoki Cup", players)
+
+		val json = tournament.toJson()
+
+		val parsed = SingleEliminationTournament.fromJson(json)
+
+		println(parsed)
 	}
 
 }

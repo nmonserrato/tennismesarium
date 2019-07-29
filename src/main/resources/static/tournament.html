@@ -45,7 +45,7 @@
     function roundToLi(roundData) {
         var nodeText = '------';
         if (roundData.type === 'SINGLE_PLAYER') {
-            nodeText = roundData.player
+            nodeText = roundData.player.name
         } else if (roundData.type === 'ELIMINATION_ROUND' && typeof roundData.match !== 'undefined') {
             var match = roundData.match;
             var p1 = match.players[0];

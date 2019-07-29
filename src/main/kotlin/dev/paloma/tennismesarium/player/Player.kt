@@ -15,4 +15,12 @@ class Player(
     fun toJson(): Map<String, String> {
         return mapOf("id" to id.toString(), "name" to name)
     }
+
+    companion object {
+        fun fromJSON(json: Map<String, Any>): Player {
+            val id = UUID.fromString(json["id"] as String)
+            val name = json["name"] as String
+            return Player(id, name)
+        }
+    }
 }

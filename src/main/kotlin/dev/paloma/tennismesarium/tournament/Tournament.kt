@@ -24,6 +24,13 @@ class SingleEliminationTournament private constructor(
         private val final: Round
 ) : Tournament() {
     companion object {
+        fun fromJson(json: Map<String, Any>): Tournament {
+            val final = Round.fromJSON(json["finalRound"] as Map<String, Any>)
+            val id = UUID.fromString(json["id"] as String)
+            val name = json["name"] as String
+            return SingleEliminationTournament(id, name, final)
+        }
+
         fun generateBrackets(tournamentName: String, players: List<Player>): SingleEliminationTournament {
             assert(players.isNotEmpty())
             assert(tournamentName.isNotBlank())
@@ -41,7 +48,6 @@ class SingleEliminationTournament private constructor(
                     RegularMatchRound.generatedBy(generateRound(half1), generateRound(half2))
                 }
             }
-
         }
     }
 

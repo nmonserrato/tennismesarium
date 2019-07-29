@@ -16,6 +16,10 @@ sealed class Match {
         fun between(player1: Player, player2: Player): Match {
             return SinglesMatch.between(player1, player2)
         }
+
+        fun fromJSON(json: Map<String, Any>): Match {
+            return SinglesMatch.fromJSON(json)
+        }
     }
 }
 
@@ -27,6 +31,13 @@ class SinglesMatch(
     companion object {
         fun between(player1: Player, player2: Player): SinglesMatch {
             return SinglesMatch(UUID.randomUUID(), Pair(player1, player2), null)
+        }
+
+        fun fromJSON(json: Map<String, Any>): Match {
+            val id = UUID.fromString(json["id"] as String)
+            val players = (json["players"] as List<Map<String, Any>>).map { Player.fromJSON(it) }.zipWithNext().first()
+            val winner = json["winner"]?.let { Player.fromJSON(it as  Map<String, Any>) }
+            return SinglesMatch(id, players, winner)
         }
     }
 

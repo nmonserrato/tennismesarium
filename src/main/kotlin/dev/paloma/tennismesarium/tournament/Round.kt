@@ -13,12 +13,26 @@ sealed class Round {
     abstract fun onMatchCompleted(matchId: UUID)
     abstract fun isCompleted(): Boolean
     abstract fun winner(): Player
+
+    companion object {
+        fun fromJSON(json: Map<String, Any>): Round {
+            return if(json["type"] == "SINGLE_PLAYER")
+                SinglePlayerRound.fromJSON(json)
+            else
+                RegularMatchRound.fromJSON(json)
+        }
+    }
 }
 
 class SinglePlayerRound private constructor(private val player: Player) : Round() {
     companion object {
         fun forPlayer(player: Player): SinglePlayerRound {
             return SinglePlayerRound(player)
+        }
+
+        fun fromJSON(json: Map<String, Any>): SinglePlayerRound {
+            val player = Player.fromJSON(json["player"] as Map<String, Any>)
+            return forPlayer(player)
         }
     }
 
@@ -33,7 +47,7 @@ class SinglePlayerRound private constructor(private val player: Player) : Round(
     override fun toJson(): Map<String, Any> {
         val output = LinkedHashMap<String, Any>()
         output["type"] = "SINGLE_PLAYER"
-        output["player"] = "$player"
+        output["player"] = player.toJson()
         return output
     }
 
@@ -53,6 +67,20 @@ class RegularMatchRound private constructor(
 
         fun generatedBy(round1: Round, round2: Round): RegularMatchRound {
             return RegularMatchRound(null, Pair(round1, round2))
+        }
+
+
+        fun fromJSON(json: Map<String, Any>): RegularMatchRound {
+            var previousRounds: Pair<Round, Round>? = null
+            if (json["previous"] != null) {
+                val listRoundsJson = json["previous"] as List<Map<String, Any>>
+                val listRounds = listRoundsJson.map { Round.fromJSON(it) }.toList()
+                if (listRounds.isNotEmpty())
+                    previousRounds = Pair(listRounds[0], listRounds[1])
+            }
+            val match = json["match"]?.let { Match.fromJSON(it as Map<String, Any>) }
+
+            return RegularMatchRound(match, previousRounds)
         }
     }
 
