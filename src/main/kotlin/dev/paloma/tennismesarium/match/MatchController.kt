@@ -27,6 +27,8 @@ class MatchController {
                 matchId, request.tournamentId, request.winnerId)
         val tournament = tournamentRepository.find(request.tournamentId) ?: return ResponseEntity.notFound().build()
         tournament.completeMatch(matchId, request.winnerId)
+        tournamentRepository.store(tournament)
+        logger.info("Match {} played and tournament {} updated", matchId, request.tournamentId)
         return ResponseEntity.accepted().build()
     }
 }
