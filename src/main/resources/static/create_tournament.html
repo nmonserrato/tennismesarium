@@ -5,7 +5,11 @@
     <title>Create a tournament - Tennismesarium</title>
 </head>
 <body>
-    <h1>Welcome! Let's create a tournament!</h1>
+    <h1>Welcome! <br />You can open an existing tournament...</h1>
+    <div id="listTournamentsDiv"></div>
+
+    <br />
+    <h1>... or create a new one</h1>
 
     <h3>Tournament name</h3> <br/>
     <input type="text" id="tournamentNameInput" value="Tomoki Cup"/>
@@ -26,6 +30,7 @@ Germanno</textarea>
 <script src="https://code.jquery.com/jquery-3.4.1.min.js"
         integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
         crossorigin="anonymous"></script>
+
 <script type="application/javascript">
     function createTournament() {
         var tournamentName = document.getElementById("tournamentNameInput").value
@@ -46,6 +51,28 @@ Germanno</textarea>
             traditional: true
         });
     }
+
+    function tournamentToLi(t) {
+        var link = '<a href="/tournament.html?id='+t.id+'">'+t.name+'</a>';
+        return $('<li>').append(link+" ("+t.created+") -> "+t.status);
+    }
+
+    function loadAvailableTournaments() {
+        $.getJSON( "/api/tournament/list", function( data ) {
+            $('#listTournamentsDiv').empty();
+            if(data.length>0) {
+                var ul = $('<ul>')
+                for (i = 0; i < data.length; i++) {
+                    ul.append(tournamentToLi(data[i]));
+                }
+                $('#listTournamentsDiv').append(ul);
+            } else {
+                $('#listTournamentsDiv').html("...nope, no tournaments available");
+            }
+        });
+    }
+
+    loadAvailableTournaments();
 
 </script>
 </body>

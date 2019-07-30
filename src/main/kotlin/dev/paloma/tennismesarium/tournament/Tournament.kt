@@ -29,6 +29,8 @@ class SingleEliminationTournament private constructor(
     companion object {
         private val formatter: DateTimeFormatter = DateTimeFormatter.RFC_1123_DATE_TIME
 
+        val DESCENDING_CREATION_DATE = compareByDescending<Tournament> { (it as SingleEliminationTournament).created }
+
         fun fromJson(json: Map<String, Any>): Tournament {
             val final = Round.fromJSON(json["finalRound"] as Map<String, Any>)
             val id = UUID.fromString(json["id"] as String)
@@ -78,6 +80,7 @@ class SingleEliminationTournament private constructor(
         output["id"] = id.toString()
         output["name"] = name
         output["created"] = formatter.format(created)
+        output["status"] = if (final.isCompleted()) "COMPLETED" else "IN PROGRESS"
         return output
     }
 

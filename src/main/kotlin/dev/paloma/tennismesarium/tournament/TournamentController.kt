@@ -1,6 +1,7 @@
 package dev.paloma.tennismesarium.tournament
 
 import dev.paloma.tennismesarium.player.PlayersRepository
+import dev.paloma.tennismesarium.tournament.SingleEliminationTournament.Companion.DESCENDING_CREATION_DATE
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
@@ -45,7 +46,11 @@ class TournamentController {
     @GetMapping("list")
     fun getDetails(): ResponseEntity<List<Map<String, Any>>> {
         logger.info("Requested list df tournaments")
-        val tournaments = tournamentRepository.findAll().map(Tournament::basicInfo)
+        val tournaments = tournamentRepository
+                .findAll()
+                .sortedWith(DESCENDING_CREATION_DATE)
+                .map(Tournament::basicInfo)
+
         return ResponseEntity.ok(tournaments)
     }
 }
