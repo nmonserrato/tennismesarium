@@ -43,6 +43,13 @@ class TournamentController {
         return ResponseEntity.ok(tournament.toJson())
     }
 
+    @DeleteMapping("{tournamentId}")
+    fun deleteTournament(@PathVariable("tournamentId") tournamentId: UUID): ResponseEntity<Unit> {
+        logger.info("Requested to delete tournament {}", tournamentId)
+        tournamentRepository.delete(tournamentId)
+        return ResponseEntity.accepted().build()
+    }
+
     @GetMapping("list")
     fun getDetails(): ResponseEntity<List<Map<String, Any>>> {
         logger.info("Requested list df tournaments")

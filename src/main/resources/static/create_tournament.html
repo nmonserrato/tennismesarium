@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Create a tournament - Tennismesarium</title>
+    <link rel="stylesheet" href="home.css">
 </head>
 <body>
     <h1>Welcome! <br />You can open an existing tournament...</h1>
@@ -52,20 +53,48 @@ Germanno</textarea>
         });
     }
 
-    function tournamentToLi(t) {
-        var link = '<a href="/tournament.html?id='+t.id+'">'+t.name+'</a>';
-        return $('<li>').append(link+" ("+t.created+") -> "+t.status);
+    function deleteTournament(tournamentId) {
+        if (confirm("Are ou sure you want to delete this tournament?")) {
+            $.ajax({
+                type: "DELETE",
+                url: "/api/tournament/"+tournamentId,
+                complete: function (request, textStatus) {
+                    loadAvailableTournaments();
+                },
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                traditional: true
+            });
+        }
+    }
+
+    function tournamentToRow(t) {
+        var openLink = '<a href="/tournament.html?id='+t.id+'">'+t.name+'</a>';
+        var deleteImg = '<img src="delete.png" onclick="deleteTournament(\''+t.id+'\')" '+
+            'width="16" height="16" onmouseover="" style="cursor: pointer;"/>';
+
+        return $('<tr>')
+            .append($('<td>').append(openLink))
+            .append($('<td>').append(t.created))
+            .append($('<td>').append(t.status))
+            .append($('<td>').append(deleteImg));
     }
 
     function loadAvailableTournaments() {
         $.getJSON( "/api/tournament/list", function( data ) {
             $('#listTournamentsDiv').empty();
-            if(data.length>0) {
-                var ul = $('<ul>')
+            if(data.length > 0) {
+                var table = $('<table>').append($('<thead>').append(
+                    $('<tr>')
+                        .append($('<td>').append("Name"))
+                        .append($('<td>').append("Created on"))
+                        .append($('<td>').append("Status"))
+                        .append($('<td>').append("Delete"))
+                ));
                 for (i = 0; i < data.length; i++) {
-                    ul.append(tournamentToLi(data[i]));
+                    table.append($('<tbody>').append(tournamentToRow(data[i])));
                 }
-                $('#listTournamentsDiv').append(ul);
+                $('#listTournamentsDiv').append(table);
             } else {
                 $('#listTournamentsDiv').html("...nope, no tournaments available");
             }

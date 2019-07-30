@@ -1,0 +1,13 @@
+td {
+    border: 1px solid #cecece;
+    padding: 5px 10px 5px 10px;
+    text-align: center;
+}
+
+thead {
+    font-weight: bold
+}
+
+a {
+    text-decoration: none;
+}

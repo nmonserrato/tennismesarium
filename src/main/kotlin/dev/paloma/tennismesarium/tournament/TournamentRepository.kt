@@ -12,6 +12,7 @@ interface TournamentRepository {
     fun find(identifier: UUID): Tournament?
     fun store(tournament: Tournament)
     fun findAll(): List<Tournament>
+    fun delete(tournamentId: UUID)
 }
 
 class InMemoryTournamentRepository : TournamentRepository {
@@ -25,6 +26,10 @@ class InMemoryTournamentRepository : TournamentRepository {
 
     override fun store(tournament: Tournament) {
         storage[tournament.identifier()] = tournament
+    }
+
+    override fun delete(tournamentId: UUID) {
+        storage.remove(tournamentId)
     }
 }
 
@@ -53,6 +58,11 @@ class FileTournamentRepository : TournamentRepository {
     override fun store(tournament: Tournament) {
         val jsonFile = tournamentFile(tournament.identifier())
         jsonFile.writeText(mapper.writeValueAsString(tournament.toJson()))
+    }
+
+    override fun delete(tournamentId: UUID) {
+        val file = tournamentFile(tournamentId)
+        if (file.exists()) file.delete()
     }
 
     private fun tournamentFile(identifier: UUID): File {
