@@ -11,12 +11,17 @@ import kotlin.collections.HashMap
 interface TournamentRepository {
     fun find(identifier: UUID): Tournament?
     fun store(tournament: Tournament)
+    fun findAll(): List<Tournament>
 }
 
 class InMemoryTournamentRepository : TournamentRepository {
     private val storage = HashMap<UUID, Tournament>()
 
     override fun find(identifier: UUID): Tournament? = storage[identifier]
+
+    override fun findAll(): List<Tournament> {
+        return storage.values.toList()
+    }
 
     override fun store(tournament: Tournament) {
         storage[tournament.identifier()] = tournament
@@ -35,6 +40,14 @@ class FileTournamentRepository : TournamentRepository {
 
         val json = mapper.readValue<Map<String, Any>>(jsonFile)
         return SingleEliminationTournament.fromJson(json)
+    }
+
+    override fun findAll(): List<Tournament> {
+        return databaseFolder
+                .listFiles { _, filename -> filename.matches(Regex("tournament.*.json")) }
+                .map { it.name.replace("tournament_", "").replace(".json", "") }
+                .map (UUID::fromString)
+                .map { find(it) !! }
     }
 
     override fun store(tournament: Tournament) {

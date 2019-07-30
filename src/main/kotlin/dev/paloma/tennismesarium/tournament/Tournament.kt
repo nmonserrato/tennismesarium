@@ -2,7 +2,8 @@ package dev.paloma.tennismesarium.tournament
 
 import dev.paloma.tennismesarium.match.Match
 import dev.paloma.tennismesarium.player.Player
-import java.lang.IllegalArgumentException
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 import java.util.*
 import kotlin.collections.LinkedHashMap
 
@@ -10,6 +11,7 @@ sealed class Tournament {
     abstract fun identifier(): UUID
     abstract fun completeMatch(matchId: UUID, winnerId: UUID)
     abstract fun toJson(): Map<String, Any>
+    abstract fun basicInfo(): Map<String, Any>
 
     companion object {
         fun createSingleElimination(tournamentName: String, players: List<Player>): Tournament {
@@ -21,14 +23,18 @@ sealed class Tournament {
 class SingleEliminationTournament private constructor(
         private val id: UUID,
         private val name: String,
-        private val final: Round
+        private val final: Round,
+        private val created: ZonedDateTime = ZonedDateTime.now()
 ) : Tournament() {
     companion object {
+        private val formatter: DateTimeFormatter = DateTimeFormatter.RFC_1123_DATE_TIME
+
         fun fromJson(json: Map<String, Any>): Tournament {
             val final = Round.fromJSON(json["finalRound"] as Map<String, Any>)
             val id = UUID.fromString(json["id"] as String)
             val name = json["name"] as String
-            return SingleEliminationTournament(id, name, final)
+            val created = ZonedDateTime.parse(json["created"] as String, formatter)
+            return SingleEliminationTournament(id, name, final, created)
         }
 
         fun generateBrackets(tournamentName: String, players: List<Player>): SingleEliminationTournament {
@@ -61,14 +67,19 @@ class SingleEliminationTournament private constructor(
     }
 
     override fun toJson(): Map<String, Any> {
-        val output = LinkedHashMap<String, Any>()
-        output["id"] = id.toString()
-        output["name"] = name
+        val output = basicInfo()
         if(final.isCompleted()) output["winner"] = final.winner().toJson()
         output["finalRound"] = final.toJson()
         return output
     }
 
-    private fun findPlayableMatch(matchId: UUID): Match? = final.findMatch(matchId)
+    override fun basicInfo(): LinkedHashMap<String, Any> {
+        val output = LinkedHashMap<String, Any>()
+        output["id"] = id.toString()
+        output["name"] = name
+        output["created"] = formatter.format(created)
+        return output
+    }
 
+    private fun findPlayableMatch(matchId: UUID): Match? = final.findMatch(matchId)
 }

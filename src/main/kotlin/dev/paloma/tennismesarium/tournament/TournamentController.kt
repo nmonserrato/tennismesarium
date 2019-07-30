@@ -41,6 +41,13 @@ class TournamentController {
         val tournament = tournamentRepository.find(tournamentId) ?: return ResponseEntity.notFound().build()
         return ResponseEntity.ok(tournament.toJson())
     }
+
+    @GetMapping("list")
+    fun getDetails(): ResponseEntity<List<Map<String, Any>>> {
+        logger.info("Requested list df tournaments")
+        val tournaments = tournamentRepository.findAll().map(Tournament::basicInfo)
+        return ResponseEntity.ok(tournaments)
+    }
 }
 
 data class TournamentCreationRequest(
