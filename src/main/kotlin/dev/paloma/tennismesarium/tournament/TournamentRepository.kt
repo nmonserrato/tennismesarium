@@ -38,6 +38,10 @@ class FileTournamentRepository : TournamentRepository {
     private val databaseFolder = File("database/")
     private val mapper = ObjectMapper().configure(JsonParser.Feature.AUTO_CLOSE_SOURCE, true)
 
+    init {
+        databaseFolder.mkdirs()
+    }
+
     override fun find(identifier: UUID): Tournament? {
         val jsonFile = tournamentFile(identifier)
         if (!jsonFile.canRead() || jsonFile.length() <= 0)
