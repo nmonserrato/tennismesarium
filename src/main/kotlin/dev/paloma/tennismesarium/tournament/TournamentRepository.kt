@@ -3,9 +3,15 @@ package dev.paloma.tennismesarium.tournament
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.dao.EmptyResultDataAccessException
+import org.springframework.jdbc.core.RowMapper
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.stereotype.Repository
 import java.io.File
+import java.sql.ResultSet
 import java.util.*
+import javax.sql.DataSource
 import kotlin.collections.HashMap
 
 interface TournamentRepository {
@@ -33,7 +39,6 @@ class InMemoryTournamentRepository : TournamentRepository {
     }
 }
 
-@Repository
 class FileTournamentRepository : TournamentRepository {
     private val databaseFolder = File("database/")
     private val mapper = ObjectMapper().configure(JsonParser.Feature.AUTO_CLOSE_SOURCE, true)
@@ -73,4 +78,51 @@ class FileTournamentRepository : TournamentRepository {
         return File(databaseFolder, "tournament_$identifier.json")
     }
 
+}
+
+@Repository
+class PostgresTournamentRepository private constructor(private val jdbc: NamedParameterJdbcTemplate) : TournamentRepository {
+    private val mapper = ObjectMapper()
+
+    @Autowired
+    constructor(dataSource: DataSource) : this(NamedParameterJdbcTemplate(dataSource))
+
+    override fun store(tournament: Tournament) {
+        val serialized = mapper.writeValueAsString(tournament.toJson())
+        jdbc.update("INSERT INTO public.tournaments (id, definition) VALUES (uuid(:id), json(:json))",
+                mapOf(
+                        "id" to tournament.identifier().toString(),
+                        "json" to serialized))
+    }
+
+    override fun findAll(): List<Tournament> {
+        return jdbc.query("SELECT * from public.tournaments", TournamentRowMapper)
+    }
+
+    override fun delete(tournamentId: UUID) {
+        jdbc.update("DELETE FROM public.tournaments WHERE id=uuid(:id)", mapOf("id" to tournamentId.toString()))
+    }
+
+    override fun find(identifier: UUID): Tournament? {
+        return try {
+            jdbc.queryForObject(
+                    "SELECT * from public.tournaments where id=uuid(:id)",
+                    mapOf("id" to identifier.toString()),
+                    TournamentRowMapper)
+        } catch (e: EmptyResultDataAccessException) {
+            null
+        }
+    }
+
+}
+
+object TournamentRowMapper : RowMapper<Tournament> {
+    private val mapper = ObjectMapper()
+
+    override fun mapRow(rs: ResultSet, idx: Int): Tournament? {
+        val content = rs.getString("definition")
+        val json = mapper.readValue<Map<String, Any>>(content)
+        return SingleEliminationTournament.fromJson(json)
+
+    }
 }
