@@ -89,7 +89,9 @@ class PostgresTournamentRepository private constructor(private val jdbc: NamedPa
 
     override fun store(tournament: Tournament) {
         val serialized = mapper.writeValueAsString(tournament.toJson())
-        jdbc.update("INSERT INTO public.tournaments (id, definition) VALUES (uuid(:id), json(:json))",
+        jdbc.update(""" INSERT INTO public.tournaments (id, definition) VALUES (uuid(:id), json(:json))
+                                ON CONFLICT (id) DO UPDATE 
+                                SET definition = excluded.definition """,
                 mapOf(
                         "id" to tournament.identifier().toString(),
                         "json" to serialized))
