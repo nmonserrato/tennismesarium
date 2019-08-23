@@ -18,29 +18,9 @@
         integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
         crossorigin="anonymous"></script>
 
-<script type="application/javascript">
-    function urlParam(name){
-       if(name=(new RegExp('[?&]'+encodeURIComponent(name)+'=([^&]*)')).exec(location.search))
-          return decodeURIComponent(name[1]);
-    }
+<script src="common.js"></script>
 
-    function submitMatchResult(matchId, winnerId, playerName) {
-        if(confirm("Do you confirm that "+playerName+" won the match?")) {
-            var tournamentId = document.getElementById("tournamentIdInput").value;
-            var postData = { "tournamentId" : tournamentId, "winnerId": winnerId}
-            $.ajax({
-                type: "PUT",
-                url: "/api/match/"+matchId,
-                data: JSON.stringify(postData),
-                complete: function (request, textStatus) {
-                    reloadTree();
-                },
-                contentType: "application/json; charset=utf-8",
-                dataType: "json",
-                traditional: true
-            });
-        }
-    }
+<script type="application/javascript">
 
     function roundToLi(roundData) {
         var nodeText = '------';
@@ -91,5 +71,5 @@
 
     reloadTree();
 </script>
-</body
+</body>
 </html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tournament details - Tennismesarium</title>
+    <link rel="stylesheet" href="brackets.css">
+</head>
+<body>
+    <br />
+    <br />
+    <div id="tournamentNameLabel" class="header"></div>
+    <div id="tournamentWinnerName" class="sub-header"></div>
+    <input type="hidden" id="tournamentIdInput" />
+
+    <div class="bracket-container">
+
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+            integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+            crossorigin="anonymous"></script>
+
+    <script src="common.js"></script>
+
+    <script type="application/javascript">
+        var levels = [];
+        var depth = 0;
+
+        function scoreFor(cssClass) {
+            if (cssClass === "winner") {
+                return "&#10004;"
+            } else if (cssClass === "loser") {
+                return "&#10006;"
+            } else {
+                return "--";
+            }
+        }
+
+        function createMatchup(round) {
+            var baseDiv = $('<div class="bracket-matchup">');
+            if(round === null)
+                return baseDiv;
+            var team1 = '----';
+            var team2 = '----';
+            var team1Class = '';
+            var team2Class = '';
+            var winner = null;
+            if(round.type === 'SINGLE_PLAYER') {
+                team1 = round.player.name;
+                winner = team1;
+                team1Class = "winner";
+                team2Class = "loser";
+            } else if(round.type === 'ELIMINATION_ROUND' && typeof round.match !== 'undefined') {
+                var p1 = round.match.players[0];
+                var p2 = round.match.players[1];
+                team1 = p1.name;
+                team2 = p2.name;
+                if (typeof round.match.winner !== 'undefined') {
+                    winner = round.match.winner.name;
+                    team1Class = (winner===team1) ? "winner" : "loser";
+                    team2Class = (winner===team2) ? "winner" : "loser";
+                } else {
+                    team1 = '<a href="#" onclick="submitMatchResult(\''+round.match.id+'\',\''+p1.id+'\',\''+p1.name+'\');return false;">'+p1.name+'</a>';
+                    team2 = '<a href="#" onclick="submitMatchResult(\''+round.match.id+'\',\''+p2.id+'\',\''+p2.name+'\');return false;">'+p2.name+'</a>';
+                }
+            }
+            return baseDiv
+                        .append($('<div class="bracket-team "+team1Class+">')
+                                    .append($('<div class="bracket-name">').append(team1))
+                                    .append($('<div class="bracket-score">').append(scoreFor(team1Class))))
+                        .append($('<div class="bracket-team "+team2Class+"">')
+                                    .append($('<div class="bracket-name">').append(team2))
+                                    .append($('<div class="bracket-score">').append(scoreFor(team2Class))));
+        }
+
+        function findDepth(round) {
+            if (round.type === 'SINGLE_PLAYER' || round.previous.length == 0) {
+                return 1;
+            } else {
+                var leftDepth = findDepth(round.previous[0]);
+                var rightDepth = findDepth(round.previous[1]);
+                return (leftDepth > rightDepth) ? leftDepth+1 : rightDepth+1;
+            }
+        }
+
+        function populateLevels(currentLevel, round) {
+            levels[currentLevel] = levels[currentLevel].append(createMatchup(round));
+            if (typeof round.previous !== 'undefined' && round.previous.length > 0) {
+                populateLevels(currentLevel+1, round.previous[0]);
+                populateLevels(currentLevel+1, round.previous[1]);
+            } else if (currentLevel < (depth-1)) {
+                levels[currentLevel+1] = levels[currentLevel+1].append(createMatchup(null));
+                levels[currentLevel+1] = levels[currentLevel+1].append(createMatchup(null));
+            }
+        }
+
+        function reloadTree() {
+            var tournamentId = urlParam("id")
+            $.getJSON( "/api/tournament/"+tournamentId, function( data ) {
+                $('#tournamentNameLabel').html("<h1>"+data.name+"</h1>");
+                $('#tournamentIdInput').val(data.id);
+
+                if (typeof data.winner !== 'undefined') {
+                    $('#tournamentWinnerName').html("<h2>Winner: "+data.winner.name+"</h2>");
+                }
+
+                $('.bracket-container').html("");
+                levels = [];
+                depth = findDepth(data.finalRound);
+
+                var i;
+
+                for (i = 0; i < depth; i++) {
+                     levels[i] = $('<div class="bracket-level">');
+                }
+
+                populateLevels(0, data.finalRound);
+
+                for (i = depth-1; i >=0; i--) {
+                    $('.bracket-container').append(levels[i]);
+                }
+
+            });
+        }
+
+        reloadTree();
+
+    </script>
+</body>
+</html>
