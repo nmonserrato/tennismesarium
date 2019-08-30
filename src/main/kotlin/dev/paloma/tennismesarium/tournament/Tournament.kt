@@ -1,6 +1,7 @@
 package dev.paloma.tennismesarium.tournament
 
 import dev.paloma.tennismesarium.match.Match
+import dev.paloma.tennismesarium.match.complete.MatchCompletedEvent
 import dev.paloma.tennismesarium.player.Player
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -17,6 +18,10 @@ sealed class Tournament {
     companion object {
         fun createSingleElimination(tournamentName: String, players: List<Player>): Tournament {
             return SingleEliminationTournament.generateBrackets(tournamentName, players.shuffled())
+        }
+
+        fun replayEvent(event: MatchCompletedEvent) {
+            event.tournament.completeMatch(event.match.identifier(), event.winner.identifier())
         }
     }
 }
@@ -62,6 +67,7 @@ class SingleEliminationTournament private constructor(
 
     override fun identifier() = id
 
+    // make it private once v2 is live?
     override fun completeMatch(matchId: UUID, winnerId: UUID) {
         val match = findPlayableMatch(matchId)
                 ?: throw IllegalArgumentException("No match $matchId found in tournament")

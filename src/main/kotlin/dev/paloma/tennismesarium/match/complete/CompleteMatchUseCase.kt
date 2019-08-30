@@ -1,7 +1,9 @@
 package dev.paloma.tennismesarium.match.complete
 
+import dev.paloma.tennismesarium.tournament.Tournament
 import dev.paloma.tennismesarium.tournament.TournamentRepository
 import org.springframework.context.ApplicationEventPublisher
+import org.springframework.context.event.EventListener
 import java.util.UUID
 
 sealed class CompleteMatchUseCaseResult
@@ -25,5 +27,11 @@ class CompleteMatchUseCase(
 
         eventPublisher.publishEvent(MatchCompletedEvent(match, tournament, player))
         return CompleteMatchUseCaseSuccess
+    }
+
+    @EventListener
+    fun updateTournamentAfterMatchCompleted(event: MatchCompletedEvent) {
+        Tournament.replayEvent(event)
+        tournamentRepository.store(event.tournament)
     }
 }

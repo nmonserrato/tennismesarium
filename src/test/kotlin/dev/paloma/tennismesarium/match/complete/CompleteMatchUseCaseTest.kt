@@ -86,6 +86,19 @@ internal class CompleteMatchUseCaseTest : BehaviorSpec({
                 result shouldBe CompleteMatchUseCaseSuccess
             }
         }
+
+        When("an event that a match is completed is received") {
+            val event = MatchCompletedEvent(match, tournament, winner)
+            every { tournamentRepository.store(any()) } just Runs
+            useCase.updateTournamentAfterMatchCompleted(event)
+
+            Then("the match is considered completed") {
+                match.isCompleted() shouldBe true
+            }
+            and("tournament storage is updated") {
+                verify { tournamentRepository.store(tournament) }
+            }
+        }
     }
 })
 
