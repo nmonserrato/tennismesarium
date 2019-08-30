@@ -11,6 +11,7 @@ sealed class Match {
     abstract fun complete(winnerId: UUID)
     abstract fun isCompleted(): Boolean
     abstract fun winner(): Player
+    abstract fun players(): List<Player>
 
     companion object {
         fun between(player1: Player, player2: Player): Match {
@@ -27,7 +28,6 @@ class SinglesMatch(
         private val id: UUID,
         private val players: Pair<Player, Player>,
         private var winner: Player?) : Match() {
-
     companion object {
         fun between(player1: Player, player2: Player): SinglesMatch {
             return SinglesMatch(UUID.randomUUID(), Pair(player1, player2), null)
@@ -51,12 +51,10 @@ class SinglesMatch(
         val output = LinkedHashMap<String, Any>()
         output["id"] = id.toString()
         output["players"] = listOf(players.first.toJson(), players.second.toJson())
-        output["canBePlayed"] = canBePlayed()
+        output["canBePlayed"] = !isCompleted()
         winner?.let { output["winner"] = it.toJson() }
         return output
     }
-
-    private fun canBePlayed(): Boolean = (winner == null)
 
     override fun isCompleted() = (winner != null)
 
@@ -69,4 +67,6 @@ class SinglesMatch(
             else -> throw  IllegalArgumentException("Player ${winnerId.toString()} is not playing match $id")
         }
     }
+
+    override fun players(): List<Player> = listOf(players.first, players.second)
 }

@@ -13,6 +13,7 @@ sealed class Round {
     abstract fun onMatchCompleted(matchId: UUID)
     abstract fun isCompleted(): Boolean
     abstract fun winner(): Player
+    abstract fun findPlayableMatches(): List<Match>
 
     companion object {
         fun fromJSON(json: Map<String, Any>): Round {
@@ -37,6 +38,8 @@ class SinglePlayerRound private constructor(private val player: Player) : Round(
     }
 
     override fun findMatch(matchId: UUID): Match? = null
+
+    override fun findPlayableMatches(): List<Match> = emptyList()
 
     override fun isCompleted() = true
 
@@ -92,6 +95,14 @@ class RegularMatchRound private constructor(
         previous?.second?.findMatch(matchId)?.let { return it }
 
         return null
+    }
+
+    override fun findPlayableMatches(): ArrayList<Match> {
+        val matches = ArrayList<Match>()
+        previous?.first?.findPlayableMatches()?.let { matches += it }
+        previous?.second?.findPlayableMatches()?.let { matches += it }
+        if (this.match != null && this.match?.isCompleted() == false) matches += this.match!!
+        return matches
     }
 
     override fun isCompleted() = match?.isCompleted() == true

@@ -11,10 +11,19 @@ data class CompleteMatchUseCaseValidationError(val message: String) : CompleteMa
 class CompleteMatchUseCase(
     private val eventPublisher: ApplicationEventPublisher,
     private val tournamentRepository: TournamentRepository) {
-    fun execute(matchId: UUID, tournamentId: UUID, winnerId: UUID) : CompleteMatchUseCaseResult {
-        tournamentRepository.find(tournamentId)
+    fun execute(matchId: UUID, tournamentId: UUID, winnerId: UUID): CompleteMatchUseCaseResult {
+        val tournament = tournamentRepository.find(tournamentId)
             ?: return CompleteMatchUseCaseValidationError("Tournament $tournamentId not found")
-        eventPublisher.publishEvent(MatchCompletedEvent(matchId, tournamentId, winnerId))
+
+        val match = tournament.findPlayableMatch(matchId)
+            ?: return CompleteMatchUseCaseValidationError(
+                "Match $matchId not found in tournament $tournamentId or cannot be played")
+
+        val player = match.players().find { it.identifier() == winnerId }
+            ?: return CompleteMatchUseCaseValidationError(
+                "Player $winnerId is not playing match $matchId")
+
+        eventPublisher.publishEvent(MatchCompletedEvent(match, tournament, player))
         return CompleteMatchUseCaseSuccess
     }
 }
