@@ -38,7 +38,10 @@ internal class CompleteMatchUseCaseTest : BehaviorSpec({
 
             Then("a failure is returned") {
                 result should beOfType<CompleteMatchUseCaseValidationError>()
-                (result as CompleteMatchUseCaseValidationError).message shouldBe  "Tournament $tournamentId not found"
+                (result as CompleteMatchUseCaseValidationError).message shouldBe "Tournament $tournamentId not found"
+            }
+            and("no event is published") {
+                verify (exactly = 0) { eventPublisher.publishEvent(any()) }
             }
         }
 
@@ -52,6 +55,9 @@ internal class CompleteMatchUseCaseTest : BehaviorSpec({
                 (result as CompleteMatchUseCaseValidationError).message shouldBe
                     "Match $invalidMatchId not found in tournament $tournamentId or cannot be played"
             }
+            and("no event is published") {
+                verify (exactly = 0) { eventPublisher.publishEvent(any()) }
+            }
         }
 
         When("the use case is invoked with a winner that is not playing that match") {
@@ -63,6 +69,9 @@ internal class CompleteMatchUseCaseTest : BehaviorSpec({
                 result should beOfType<CompleteMatchUseCaseValidationError>()
                 (result as CompleteMatchUseCaseValidationError).message shouldBe
                     "Player $invalidWinnerId is not playing match $matchId"
+            }
+            and("no event is published") {
+                verify (exactly = 0) { eventPublisher.publishEvent(any()) }
             }
         }
 
