@@ -4,12 +4,15 @@ import dev.paloma.tennismesarium.tournament.Tournament
 import dev.paloma.tennismesarium.tournament.TournamentRepository
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.event.EventListener
+import org.springframework.core.annotation.Order
+import org.springframework.stereotype.Service
 import java.util.UUID
 
 sealed class CompleteMatchUseCaseResult
 object CompleteMatchUseCaseSuccess : CompleteMatchUseCaseResult()
 data class CompleteMatchUseCaseValidationError(val message: String) : CompleteMatchUseCaseResult()
 
+@Service
 class CompleteMatchUseCase(
     private val eventPublisher: ApplicationEventPublisher,
     private val tournamentRepository: TournamentRepository) {
@@ -30,6 +33,7 @@ class CompleteMatchUseCase(
     }
 
     @EventListener
+    @Order(0)
     fun updateTournamentAfterMatchCompleted(event: MatchCompletedEvent) {
         Tournament.replayEvent(event)
         tournamentRepository.store(event.tournament)
