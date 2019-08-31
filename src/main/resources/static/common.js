@@ -21,6 +21,24 @@ function submitMatchResult(matchId, winnerId, playerName) {
     }
 }
 
+function submitMatchResultAsync(matchId, winnerId, playerName) {
+    if(confirm("Do you confirm that "+playerName+" won the match?")) {
+        var tournamentId = document.getElementById("tournamentIdInput").value;
+        var postData = { "tournamentId" : tournamentId, "winnerId": winnerId}
+        $.ajax({
+            type: "PUT",
+            url: "/api/v2/match/"+matchId,
+            data: JSON.stringify(postData),
+            complete: function (request, textStatus) {
+                console.log("submitted to v2!");
+            },
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            traditional: true
+        });
+    }
+}
+
 var alternativeView;
 if (window.location.href.indexOf("tree.html") !== -1) {
     alternativeView = window.location.href.replace("tree.html", "brackets.html");
