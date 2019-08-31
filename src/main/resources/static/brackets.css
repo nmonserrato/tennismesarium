@@ -115,3 +115,7 @@ html, body{
 .bracket-team:hover>.bracket-score{
   display: none;
 }
+
+.withPointer {
+    cursor: pointer;
+}

@@ -45,11 +45,14 @@
             var team1Class = '';
             var team2Class = '';
             var winner = null;
+            var submitLink1 = '';
+            var submitLink2 = '';
+            var clickable = false;
             if(round.type === 'SINGLE_PLAYER') {
                 team1 = round.player.name;
                 winner = team1;
                 team1Class = "winner";
-                team2Class = "loser";
+                team2Class = "null";
             } else if(round.type === 'ELIMINATION_ROUND' && typeof round.match !== 'undefined') {
                 var p1 = round.match.players[0];
                 var p2 = round.match.players[1];
@@ -60,15 +63,18 @@
                     team1Class = (winner===team1) ? "winner" : "loser";
                     team2Class = (winner===team2) ? "winner" : "loser";
                 } else {
-                    team1 = '<a href="#" onclick="submitMatchResult(\''+round.match.id+'\',\''+p1.id+'\',\''+p1.name+'\');return false;">'+p1.name+'</a>';
-                    team2 = '<a href="#" onclick="submitMatchResult(\''+round.match.id+'\',\''+p2.id+'\',\''+p2.name+'\');return false;">'+p2.name+'</a>';
+                    clickable = true;
+                    submitLink1 = 'onclick="submitMatchResult(\''+round.match.id+'\',\''+p1.id+'\',\''+p1.name+'\');return false;"';
+                    submitLink2 = 'onclick="submitMatchResult(\''+round.match.id+'\',\''+p2.id+'\',\''+p2.name+'\');return false;"';
+                    team1 = '<a href="#" '+submitLink1+'>'+p1.name+'</a>';
+                    team2 = '<a href="#" '+submitLink2+'>'+p2.name+'</a>';
                 }
             }
             return baseDiv
-                        .append($('<div class="bracket-team "+team1Class+">')
+                        .append($('<div class="bracket-team '+team1Class+' '+(clickable?'withPointer':'')+'" '+submitLink1+'>')
                                     .append($('<div class="bracket-name">').append(team1))
                                     .append($('<div class="bracket-score">').append(scoreFor(team1Class))))
-                        .append($('<div class="bracket-team "+team2Class+"">')
+                        .append($('<div class="bracket-team '+team2Class+' '+(clickable?'withPointer':'')+'" '+submitLink2+'>')
                                     .append($('<div class="bracket-name">').append(team2))
                                     .append($('<div class="bracket-score">').append(scoreFor(team2Class))));
         }
