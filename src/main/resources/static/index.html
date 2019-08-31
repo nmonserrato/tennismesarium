@@ -45,7 +45,7 @@ Germanno</textarea>
                 var location = request.getResponseHeader('location');
                 console.log('location '+location);
                 var tournamentId = location.substring(location.lastIndexOf('/')+1);
-                window.location.href = '/tree.html?id='+tournamentId;
+                window.location.href = '/brackets.html?id='+tournamentId;
             },
             contentType: "application/json; charset=utf-8",
             dataType: "json",
@@ -69,7 +69,7 @@ Germanno</textarea>
     }
 
     function tournamentToRow(t) {
-        var openLink = '<a href="/tree.html?id='+t.id+'">'+t.name+'</a>';
+        var openLink = '<a href="/brackets.html?id='+t.id+'">'+t.name+'</a>';
         var deleteImg = '<img src="delete.png" onclick="deleteTournament(\''+t.id+'\')" '+
             'width="16" height="16" onmouseover="" style="cursor: pointer;"/>';
 

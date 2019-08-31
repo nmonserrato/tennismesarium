@@ -23,9 +23,6 @@
     <script src="common.js"></script>
 
     <script type="application/javascript">
-        var levels = [];
-        var depth = 0;
-
         function scoreFor(cssClass) {
             if (cssClass === "winner") {
                 return "&#10004;"
@@ -66,8 +63,6 @@
                     clickable = true;
                     submitLink1 = 'onclick="submitMatchResultAsync(\''+round.match.id+'\',\''+p1.id+'\',\''+p1.name+'\');return false;"';
                     submitLink2 = 'onclick="submitMatchResultAsync(\''+round.match.id+'\',\''+p2.id+'\',\''+p2.name+'\');return false;"';
-                    team1 = '<a href="#" '+submitLink1+'>'+p1.name+'</a>';
-                    team2 = '<a href="#" '+submitLink2+'>'+p2.name+'</a>';
                 }
             }
             return baseDiv
@@ -89,11 +84,11 @@
             }
         }
 
-        function populateLevels(currentLevel, round) {
+        function populateLevels(currentLevel, round, levels, depth) {
             levels[currentLevel] = levels[currentLevel].append(createMatchup(round));
             if (typeof round.previous !== 'undefined' && round.previous.length > 0) {
-                populateLevels(currentLevel+1, round.previous[0]);
-                populateLevels(currentLevel+1, round.previous[1]);
+                populateLevels(currentLevel+1, round.previous[0], levels, depth);
+                populateLevels(currentLevel+1, round.previous[1], levels, depth);
             } else if (currentLevel < (depth-1)) {
                 levels[currentLevel+1] = levels[currentLevel+1].append(createMatchup(null));
                 levels[currentLevel+1] = levels[currentLevel+1].append(createMatchup(null));
@@ -108,20 +103,40 @@
                 $('#tournamentWinnerName').html("<h2>Winner: " + data.winner.name + "</h2>");
             }
 
+            var finalLevel;
+            var leftLevels = [];
+            var rightLevels = [];
+
             $('.bracket-container').html("");
-            levels = [];
-            depth = findDepth(data.finalRound);
 
             var i;
 
-            for (i = 0; i < depth; i++) {
-                levels[i] = $('<div class="bracket-level">');
+            finalLevel = $('<div class="bracket-level">').append(createMatchup(data.finalRound));
+            if (typeof data.finalRound.previous === 'undefined' || data.finalRound.previous.length == 0){
+                $('.bracket-container').append(finalLevel);
+                return;
             }
 
-            populateLevels(0, data.finalRound);
+            var leftDepth = findDepth(data.finalRound.previous[0]);
+            var rightDepth = findDepth(data.finalRound.previous[1]);
 
-            for (i = depth - 1; i >= 0; i--) {
-                $('.bracket-container').append(levels[i]);
+            for (i = 0; i < leftDepth; i++) {
+                leftLevels[i] = $('<div class="bracket-level">');
+            }
+
+            for (i = 0; i < rightDepth; i++) {
+                rightLevels[i] = $('<div class="bracket-level">');
+            }
+
+            populateLevels(0, data.finalRound.previous[0], leftLevels, leftDepth);
+            populateLevels(0, data.finalRound.previous[1], rightLevels, rightDepth);
+
+            for (i = leftDepth - 1; i >= 0; i--) {
+                $('.bracket-container').append(leftLevels[i]);
+            }
+            $('.bracket-container').append(finalLevel);
+            for (i = 0; i < rightDepth; i++) {
+                $('.bracket-container').append(rightLevels[i]);
             }
         }
 

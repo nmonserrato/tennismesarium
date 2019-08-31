@@ -118,4 +118,5 @@ html, body{
 
 .withPointer {
     cursor: pointer;
+    background-color: #e6ffff;
 }
