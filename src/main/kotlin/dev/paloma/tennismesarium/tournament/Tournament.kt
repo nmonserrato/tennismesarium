@@ -1,21 +1,27 @@
 package dev.paloma.tennismesarium.tournament
 
 import dev.paloma.tennismesarium.match.Match
+import dev.paloma.tennismesarium.match.complete.MatchCompletedEvent
 import dev.paloma.tennismesarium.player.Player
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
-import java.util.*
-import kotlin.collections.LinkedHashMap
+import java.util.UUID
 
 sealed class Tournament {
     abstract fun identifier(): UUID
     abstract fun completeMatch(matchId: UUID, winnerId: UUID)
     abstract fun toJson(): Map<String, Any>
     abstract fun basicInfo(): Map<String, Any>
+    abstract fun findPlayableMatch(matchId: UUID): Match?
+    abstract fun findPlayableMatches(): List<Match>
 
     companion object {
         fun createSingleElimination(tournamentName: String, players: List<Player>): Tournament {
             return SingleEliminationTournament.generateBrackets(tournamentName, players.shuffled())
+        }
+
+        fun replayEvent(event: MatchCompletedEvent) {
+            event.tournament.completeMatch(event.match.identifier(), event.winner.identifier())
         }
     }
 }
@@ -61,6 +67,7 @@ class SingleEliminationTournament private constructor(
 
     override fun identifier() = id
 
+    // make it private once v2 is live?
     override fun completeMatch(matchId: UUID, winnerId: UUID) {
         val match = findPlayableMatch(matchId)
                 ?: throw IllegalArgumentException("No match $matchId found in tournament")
@@ -84,5 +91,7 @@ class SingleEliminationTournament private constructor(
         return output
     }
 
-    private fun findPlayableMatch(matchId: UUID): Match? = final.findMatch(matchId)
+    override fun findPlayableMatch(matchId: UUID): Match? = final.findMatch(matchId)
+
+    override fun findPlayableMatches() = final.findPlayableMatches()
 }

@@ -64,8 +64,8 @@
                     team2Class = (winner===team2) ? "winner" : "loser";
                 } else {
                     clickable = true;
-                    submitLink1 = 'onclick="submitMatchResult(\''+round.match.id+'\',\''+p1.id+'\',\''+p1.name+'\');return false;"';
-                    submitLink2 = 'onclick="submitMatchResult(\''+round.match.id+'\',\''+p2.id+'\',\''+p2.name+'\');return false;"';
+                    submitLink1 = 'onclick="submitMatchResultAsync(\''+round.match.id+'\',\''+p1.id+'\',\''+p1.name+'\');return false;"';
+                    submitLink2 = 'onclick="submitMatchResultAsync(\''+round.match.id+'\',\''+p2.id+'\',\''+p2.name+'\');return false;"';
                     team1 = '<a href="#" '+submitLink1+'>'+p1.name+'</a>';
                     team2 = '<a href="#" '+submitLink2+'>'+p2.name+'</a>';
                 }
@@ -100,37 +100,72 @@
             }
         }
 
+        function drawTree(data) {
+            $('#tournamentNameLabel').html("<h1>" + data.name + "</h1>");
+            $('#tournamentIdInput').val(data.id);
+
+            if (typeof data.winner !== 'undefined') {
+                $('#tournamentWinnerName').html("<h2>Winner: " + data.winner.name + "</h2>");
+            }
+
+            $('.bracket-container').html("");
+            levels = [];
+            depth = findDepth(data.finalRound);
+
+            var i;
+
+            for (i = 0; i < depth; i++) {
+                levels[i] = $('<div class="bracket-level">');
+            }
+
+            populateLevels(0, data.finalRound);
+
+            for (i = depth - 1; i >= 0; i--) {
+                $('.bracket-container').append(levels[i]);
+            }
+        }
+
         function reloadTree() {
-            var tournamentId = urlParam("id")
+            var tournamentId = urlParam("id");
             $.getJSON( "/api/tournament/"+tournamentId, function( data ) {
-                $('#tournamentNameLabel').html("<h1>"+data.name+"</h1>");
-                $('#tournamentIdInput').val(data.id);
-
-                if (typeof data.winner !== 'undefined') {
-                    $('#tournamentWinnerName').html("<h2>Winner: "+data.winner.name+"</h2>");
-                }
-
-                $('.bracket-container').html("");
-                levels = [];
-                depth = findDepth(data.finalRound);
-
-                var i;
-
-                for (i = 0; i < depth; i++) {
-                     levels[i] = $('<div class="bracket-level">');
-                }
-
-                populateLevels(0, data.finalRound);
-
-                for (i = depth-1; i >=0; i--) {
-                    $('.bracket-container').append(levels[i]);
-                }
-
+                drawTree(data);
             });
         }
 
-        reloadTree();
+        function waitForEvents() {
+            this.source = null;
 
+            this.startStream = function () {
+                console.log("Starting stream...");
+                var tournamentId = urlParam("id");
+                this.source = new EventSource("/api/v2/tournament/"+tournamentId);
+                this.source.addEventListener("message", function (event) {
+                    console.log("Received update for tournament "+tournamentId)
+                    var tournament = JSON.parse(event.data);
+                    drawTree(tournament);
+                });
+
+                this.source.onerror = function () {
+                    this.close();
+                };
+
+            };
+
+            this.stopStream = function() {
+                console.log("Closing stream...");
+                this.source.close();
+            };
+
+            window.onload = function() {
+                this.startStream();
+            };
+            window.onbeforeunload = function() {
+                this.stopStream();
+            };
+        }
+
+        reloadTree();
+        waitForEvents();
     </script>
 </body>
 </html>
