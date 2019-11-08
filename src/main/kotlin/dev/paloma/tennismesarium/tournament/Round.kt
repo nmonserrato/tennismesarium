@@ -139,3 +139,34 @@ class RegularMatchRound private constructor(
         else "TBD"
     }
 }
+
+class RoundRobinRound(
+        private val sequence: Int,
+        private val games: List<Match>
+) : Round() {
+    override fun toJson(): Map<String, Any> {
+        return mapOf(
+                "sequence" to sequence,
+                "matches" to games.map { it.toJson() }.toList())
+    }
+
+    override fun findMatch(matchId: UUID): Match? {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun onMatchCompleted(matchId: UUID) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun isCompleted(): Boolean {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun winner(): Player {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun findPlayableMatches(): List<Match> {
+        return games; //TODO fix this, return only playable matches
+    }
+}
