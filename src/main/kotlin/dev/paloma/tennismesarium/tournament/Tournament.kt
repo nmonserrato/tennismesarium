@@ -14,11 +14,13 @@ sealed class Tournament (
         open val name: String,
         open val created: ZonedDateTime
 ) {
-    abstract fun completeMatch(matchId: UUID, winnerId: UUID)
     abstract fun toJson(): Map<String, Any>
 
     abstract fun findPlayableMatch(matchId: UUID): Match?
     abstract fun findPlayableMatches(): List<Match>
+
+    abstract fun updateRoundsAfterMatchCompleted()
+    abstract fun isOver(): Boolean
 
     fun identifier() = id
 
@@ -26,9 +28,19 @@ sealed class Tournament (
         val output = LinkedHashMap<String, Any>()
         output["id"] = id.toString()
         output["name"] = name
+        output["status"] = if (isOver()) "COMPLETED" else "IN PROGRESS"
         output["created"] = formatter.format(created)
         return output
     }
+
+    // make it private once v2 is live?
+    fun completeMatch(matchId: UUID, winnerId: UUID) {
+        val match = findPlayableMatch(matchId)
+                ?: throw IllegalArgumentException("No match $matchId found in tournament")
+        match.complete(winnerId)
+        updateRoundsAfterMatchCompleted()
+    }
+
 
     companion object {
         val formatter: DateTimeFormatter = DateTimeFormatter.RFC_1123_DATE_TIME
@@ -80,39 +92,31 @@ class SingleEliminationTournament private constructor(
         }
     }
 
-    // make it private once v2 is live?
-    override fun completeMatch(matchId: UUID, winnerId: UUID) {
-        val match = findPlayableMatch(matchId)
-                ?: throw IllegalArgumentException("No match $matchId found in tournament")
-        match.complete(winnerId)
-        final.onMatchCompleted(matchId)
+    override fun updateRoundsAfterMatchCompleted() {
+        final.updateAfterMatchPlayed()
     }
 
     override fun toJson(): Map<String, Any> {
         val output = basicInfo()
-        if(final.isCompleted()) output["winner"] = final.winner().toJson()
+        if(isOver()) output["winner"] = final.winner().toJson()
         output["finalRound"] = final.toJson()
-        return output
-    }
-
-    override fun basicInfo(): MutableMap<String, Any> {
-        val output = super.basicInfo()
-        output["status"] = if (final.isCompleted()) "COMPLETED" else "IN PROGRESS"
         return output
     }
 
     override fun findPlayableMatch(matchId: UUID): Match? = final.findMatch(matchId)
 
     override fun findPlayableMatches() = final.findPlayableMatches()
+
+    override fun isOver() = final.isCompleted()
 }
 
 class RoundRobinTournament private constructor(
         override val id: UUID,
         override val name: String,
         override val created: ZonedDateTime = ZonedDateTime.now(),
-        private val rounds: List<RoundRobinRound> = ArrayList()
+        private val rounds: List<RoundRobinRound> = ArrayList(),
+        private var currentRoundIndex: Int = -1
 ) : Tournament(id, name, created) {
-
     companion object {
         fun generateRounds(name: String, players: List<Player>): RoundRobinTournament {
             val fakePlayer = Player(UUID.randomUUID(), "Fake")
@@ -150,13 +154,14 @@ class RoundRobinTournament private constructor(
                 rounds.add(RoundRobinRound(r + 1, matchesOfRound))
             }
 
-            return RoundRobinTournament(id = UUID.randomUUID(), name = name, rounds = rounds)
+            return RoundRobinTournament(id = UUID.randomUUID(), name = name, rounds = rounds, currentRoundIndex = 0)
         }
 
     }
 
-    override fun completeMatch(matchId: UUID, winnerId: UUID) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun updateRoundsAfterMatchCompleted() {
+        if (currentRound().isCompleted())
+            currentRoundIndex++
     }
 
     override fun toJson(): Map<String, Any> {
@@ -165,17 +170,11 @@ class RoundRobinTournament private constructor(
         return output
     }
 
-    override fun basicInfo(): MutableMap<String, Any> {
-        val output = super.basicInfo()
-        output["status"] = "" //TODO set COMPLETED or IN PROGRESS
-        return output
-    }
+    override fun findPlayableMatch(matchId: UUID) = currentRound().findMatch(matchId)
 
-    override fun findPlayableMatch(matchId: UUID): Match? {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun findPlayableMatches() = currentRound().findPlayableMatches()
 
-    override fun findPlayableMatches(): List<Match> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun isOver() = currentRoundIndex >= rounds.size
+
+    private fun currentRound() = rounds[currentRoundIndex]
 }

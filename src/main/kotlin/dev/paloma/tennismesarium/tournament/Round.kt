@@ -2,7 +2,6 @@ package dev.paloma.tennismesarium.tournament
 
 import dev.paloma.tennismesarium.match.Match
 import dev.paloma.tennismesarium.player.Player
-import java.lang.IllegalStateException
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.LinkedHashMap
@@ -10,7 +9,7 @@ import kotlin.collections.LinkedHashMap
 sealed class Round {
     abstract fun toJson(): Map<String, Any>
     abstract fun findMatch(matchId: UUID): Match?
-    abstract fun onMatchCompleted(matchId: UUID)
+    abstract fun updateAfterMatchPlayed()
     abstract fun isCompleted(): Boolean
     abstract fun winner(): Player
     abstract fun findPlayableMatches(): List<Match>
@@ -43,7 +42,7 @@ class SinglePlayerRound private constructor(private val player: Player) : Round(
 
     override fun isCompleted() = true
 
-    override fun onMatchCompleted(matchId: UUID) {}
+    override fun updateAfterMatchPlayed() {}
 
     override fun winner() = player
 
@@ -109,15 +108,15 @@ class RegularMatchRound private constructor(
 
     override fun winner() = match?.winner() ?: throw IllegalStateException("Round is not complete yet")
 
-    override fun onMatchCompleted(matchId: UUID) {
+    override fun updateAfterMatchPlayed() {
         if (match != null) return
 
         if (previous?.first?.isCompleted() == true && previous.second.isCompleted()) {
             match = Match.between(previous.first.winner(), previous.second.winner())
         }
 
-        previous?.first?.onMatchCompleted(matchId)
-        previous?.second?.onMatchCompleted(matchId)
+        previous?.first?.updateAfterMatchPlayed()
+        previous?.second?.updateAfterMatchPlayed()
 
         return
     }
@@ -151,22 +150,14 @@ class RoundRobinRound(
     }
 
     override fun findMatch(matchId: UUID): Match? {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return games.find { it.identifier() == matchId }
     }
 
-    override fun onMatchCompleted(matchId: UUID) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun updateAfterMatchPlayed() { }
 
-    override fun isCompleted(): Boolean {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun isCompleted() = games.all { it.isCompleted() }
 
-    override fun winner(): Player {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun winner() = throw UnsupportedOperationException("Round Robin rounds do not have a single winner")
 
-    override fun findPlayableMatches(): List<Match> {
-        return games; //TODO fix this, return only playable matches
-    }
+    override fun findPlayableMatches() = games.filter { !it.isCompleted() }
 }
