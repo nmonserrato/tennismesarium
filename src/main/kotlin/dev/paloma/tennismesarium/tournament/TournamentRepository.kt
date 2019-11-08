@@ -3,11 +3,9 @@ package dev.paloma.tennismesarium.tournament
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.EmptyResultDataAccessException
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
-import org.springframework.stereotype.Repository
 import java.io.File
 import java.sql.ResultSet
 import java.util.*
@@ -80,11 +78,9 @@ class FileTournamentRepository : TournamentRepository {
 
 }
 
-@Repository
 class PostgresTournamentRepository private constructor(private val jdbc: NamedParameterJdbcTemplate) : TournamentRepository {
     private val mapper = ObjectMapper()
 
-    @Autowired
     constructor(dataSource: DataSource) : this(NamedParameterJdbcTemplate(dataSource))
 
     override fun store(tournament: Tournament) {

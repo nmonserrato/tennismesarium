@@ -3,11 +3,9 @@ package dev.paloma.tennismesarium.player
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
-import org.springframework.stereotype.Repository
 import java.io.File
 import java.sql.ResultSet
 import java.util.*
@@ -52,9 +50,7 @@ class FilePlayersRepository : PlayersRepository {
     }
 }
 
-@Repository
 class PostgresPlayersRepository private constructor(private val jdbc: NamedParameterJdbcTemplate) : PlayersRepository {
-    @Autowired
     constructor(dataSource: DataSource) : this(NamedParameterJdbcTemplate(dataSource))
 
     override fun createAll(names: List<String>): List<Player> {
