@@ -26,10 +26,15 @@ class TournamentController {
 
     @PostMapping
     fun createTournament(@RequestBody @Validated request: TournamentCreationRequest): ResponseEntity<Unit> {
-        logger.info("Requested to create tournament with name {} and players {}",
-                request.tournamentName, request.playerNames)
+        logger.info("Requested to create tournament of type {} with name {} and players {}",
+                request.mode, request.tournamentName, request.playerNames)
         val players = playersRepository.createAll(request.playerNames)
-        val tournament = Tournament.createSingleElimination(request.tournamentName, players)
+
+        val tournament = if(request.mode == "elimination")
+            Tournament.createSingleElimination(request.tournamentName, players)
+        else
+            Tournament.createFixtures(request.tournamentName, players)
+
         tournamentRepository.store(tournament)
         return ResponseEntity.created(
                 URI.create("http://localhost:8080/api/tournament/${tournament.identifier()}")
@@ -64,5 +69,6 @@ class TournamentController {
 
 data class TournamentCreationRequest(
         @NotNull val tournamentName: String,
+        @NotNull val mode: String,
         @NotNull @Size(min = 1) val playerNames: List<String>
 )

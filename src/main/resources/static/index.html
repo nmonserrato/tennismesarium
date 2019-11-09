@@ -26,17 +26,18 @@ Nino
 Diego
 Germanno</textarea>
     <br/> <br/>
-    <button onclick="createTournament()">Create</button>
+    <button onclick="createTournament('elimination')">Create single elimination</button>
+    <button onclick="createTournament('fixtures')">Create fixtures</button>
 
 <script src="https://code.jquery.com/jquery-3.4.1.min.js"
         integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
         crossorigin="anonymous"></script>
 
 <script type="application/javascript">
-    function createTournament() {
+    function createTournament(tournamentType) {
         var tournamentName = document.getElementById("tournamentNameInput").value
         var playersLines = document.getElementById("playersInput").value.split("\n")
-        var postData = { "tournamentName": tournamentName, "playerNames": playersLines };
+        var postData = { "tournamentName": tournamentName, "playerNames": playersLines, "mode": tournamentType };
         $.ajax({
             type: "POST",
             url: "/api/tournament",
@@ -45,7 +46,10 @@ Germanno</textarea>
                 var location = request.getResponseHeader('location');
                 console.log('location '+location);
                 var tournamentId = location.substring(location.lastIndexOf('/')+1);
-                window.location.href = '/brackets.html?id='+tournamentId;
+                if (tournamentType == 'elimination')
+                    window.location.href = '/brackets.html?id='+tournamentId;
+                else
+                    window.location.href = '/fixtures.html?id='+tournamentId;
             },
             contentType: "application/json; charset=utf-8",
             dataType: "json",

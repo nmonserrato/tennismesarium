@@ -12,7 +12,8 @@ import kotlin.collections.LinkedHashMap
 sealed class Tournament (
         open val id: UUID,
         open val name: String,
-        open val created: ZonedDateTime
+        open val created: ZonedDateTime,
+        open val type: String
 ) {
     abstract fun toJson(): Map<String, Any>
 
@@ -28,6 +29,7 @@ sealed class Tournament (
         val output = LinkedHashMap<String, Any>()
         output["id"] = id.toString()
         output["name"] = name
+        output["mode"] = type
         output["status"] = if (isOver()) "COMPLETED" else "IN PROGRESS"
         output["created"] = formatter.format(created)
         return output
@@ -49,6 +51,10 @@ sealed class Tournament (
             return SingleEliminationTournament.generateBrackets(tournamentName, players.shuffled())
         }
 
+        fun createFixtures(tournamentName: String, players: List<Player>): Tournament {
+            return RoundRobinTournament.generateRounds(tournamentName, players)
+        }
+
         fun replayEvent(event: MatchCompletedEvent) {
             event.tournament.completeMatch(event.match.identifier(), event.winner.identifier())
         }
@@ -60,7 +66,7 @@ class SingleEliminationTournament private constructor(
         override val name: String,
         private val final: Round,
         override val created: ZonedDateTime = ZonedDateTime.now()
-) : Tournament(id, name, created) {
+) : Tournament(id, name, created, "SINGLE_ELIMINATION") {
     companion object {
         val DESCENDING_CREATION_DATE = compareByDescending<Tournament> { (it as SingleEliminationTournament).created }
 
@@ -116,7 +122,7 @@ class RoundRobinTournament private constructor(
         override val created: ZonedDateTime = ZonedDateTime.now(),
         private val rounds: List<RoundRobinRound> = ArrayList(),
         private var currentRoundIndex: Int = -1
-) : Tournament(id, name, created) {
+) : Tournament(id, name, created, "FIXTURES") {
     companion object {
         fun generateRounds(name: String, players: List<Player>): RoundRobinTournament {
             val fakePlayer = Player(UUID.randomUUID(), "Fake")
