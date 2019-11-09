@@ -68,7 +68,7 @@ class SingleEliminationTournament private constructor(
         override val created: ZonedDateTime = ZonedDateTime.now()
 ) : Tournament(id, name, created, "SINGLE_ELIMINATION") {
     companion object {
-        val DESCENDING_CREATION_DATE = compareByDescending<Tournament> { (it as SingleEliminationTournament).created }
+        val DESCENDING_CREATION_DATE = compareByDescending<Tournament> { it.created }
 
         fun fromJson(json: Map<String, Any>): Tournament {
             val final = Round.fromJSON(json["finalRound"] as Map<String, Any>)
@@ -172,6 +172,7 @@ class RoundRobinTournament private constructor(
 
     override fun toJson(): Map<String, Any> {
         val output = basicInfo()
+        output["currentRound"] = currentRoundIndex
         output["rounds"] = rounds.map { it.toJson() }.toList()
         return output
     }

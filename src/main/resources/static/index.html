@@ -73,7 +73,11 @@ Germanno</textarea>
     }
 
     function tournamentToRow(t) {
-        var openLink = '<a href="/brackets.html?id='+t.id+'">'+t.name+'</a>';
+        var openLink;
+        if (t.mode == 'SINGLE_ELIMINATION')
+            openLink = '<a href="/brackets.html?id='+t.id+'">'+t.name+'</a>';
+        else
+            openLink = '<a href="/fixtures.html?id='+t.id+'">'+t.name+'</a>';
         var deleteImg = '<img src="delete.png" onclick="deleteTournament(\''+t.id+'\')" '+
             'width="16" height="16" onmouseover="" style="cursor: pointer;"/>';
 

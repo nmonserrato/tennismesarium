@@ -20,5 +20,52 @@
             crossorigin="anonymous"></script>
 
     <script src="common.js"></script>
+
+    <script type="application/javascript">
+        function drawRound(round) {
+            $('.bracket-container').append("<h3>Round "+round.sequence+"</h3>");
+            for (i = 0; i < round.matches.length; i++) {
+                match = round.matches[i];
+                var p1 = match.players[0];
+                var p2 = match.players[1];
+                if (match.canBePlayed) {
+                    nodeText = '<a href="#" onclick="submitMatchResult(\''+match.id+'\',\''+p1.id+'\',\''+p1.name+'\');return false;">'+p1.name+'</a> vs '+
+                               '<a href="#" onclick="submitMatchResult(\''+match.id+'\',\''+p2.id+'\',\''+p2.name+'\');return false;">'+p2.name+'</a>';
+                } else {
+                    var p1Text = p1.name;
+                    var p2Text = p2.name;
+                    if (p1.id == match.winner.id)
+                        p1Text = "<b>"+p1.name+"</b>";
+                    else
+                        p2Text = "<b>"+p2.name+"</b>";
+                    nodeText = p1Text +' vs '+ p2Text
+                }
+
+                $('.bracket-container').append("<div style='padding: 10px 0px 10px 0px'>"+nodeText+"</div>");
+            }
+        }
+
+        function drawInfoAndRounds(data) {
+            $('#tournamentNameLabel').html("<h1>" + data.name + "</h1>");
+            $('#tournamentIdInput').val(data.id);
+
+            if (typeof data.winner !== 'undefined') {
+                $('#tournamentWinnerName').html("<h2>Winner: " + data.winner.name + "</h2>");
+            }
+
+            $('.bracket-container').html("");
+
+            drawRound(data.rounds[data.currentRound]);
+        }
+
+        function reloadTree() {
+            var tournamentId = urlParam("id");
+            $.getJSON( "/api/tournament/"+tournamentId, function( data ) {
+                drawInfoAndRounds(data);
+            });
+        }
+
+        reloadTree();
+    </script>
 </body>
 </html>
