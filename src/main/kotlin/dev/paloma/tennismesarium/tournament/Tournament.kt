@@ -58,6 +58,13 @@ sealed class Tournament (
         fun replayEvent(event: MatchCompletedEvent) {
             event.tournament.completeMatch(event.match.identifier(), event.winner.identifier())
         }
+
+        fun fromJson(json: Map<String, Any>): Tournament {
+            return if (json["mode"] == "SINGLE_ELIMINATION")
+                SingleEliminationTournament.fromJson(json)
+            else
+                RoundRobinTournament.fromJson(json)
+        }
     }
 }
 
@@ -161,6 +168,17 @@ class RoundRobinTournament private constructor(
             }
 
             return RoundRobinTournament(id = UUID.randomUUID(), name = name, rounds = rounds, currentRoundIndex = 0)
+        }
+
+        fun fromJson(json: Map<String, Any>): Tournament {
+            val id = UUID.fromString(json["id"] as String)
+            val name = json["name"] as String
+            val created = ZonedDateTime.parse(json["created"] as String, formatter)
+            val currentRound = json["currentRound"] as Int
+            val rounds = (json["rounds"] as List<Map<String, Any>>)
+                    .map { RoundRobinRound.fromJson(it) }
+                    .toList()
+            return RoundRobinTournament(id, name, created, rounds, currentRound)
         }
 
     }

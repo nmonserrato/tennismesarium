@@ -120,7 +120,6 @@ object TournamentRowMapper : RowMapper<Tournament> {
     override fun mapRow(rs: ResultSet, idx: Int): Tournament? {
         val content = rs.getString("definition")
         val json = mapper.readValue<Map<String, Any>>(content)
-        return SingleEliminationTournament.fromJson(json)
-
+        return Tournament.fromJson(json)
     }
 }

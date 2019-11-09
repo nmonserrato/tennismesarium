@@ -143,6 +143,17 @@ class RoundRobinRound(
         private val sequence: Int,
         private val games: List<Match>
 ) : Round() {
+
+    companion object {
+        fun fromJson(json: Map<String, Any>): RoundRobinRound {
+            val sequence = json["sequence"] as Int
+            val matches = (json["matches"] as List< Map<String, Any>>)
+                    .map { Match.fromJSON(it) }
+                    .toList()
+            return RoundRobinRound(sequence, matches)
+        }
+    }
+
     override fun toJson(): Map<String, Any> {
         return mapOf(
                 "sequence" to sequence,
