@@ -25,25 +25,33 @@
     <script type="application/javascript">
         function drawRound(round) {
             $('.bracket-container').append("<h3>Round "+round.sequence+"</h3>");
+            var table = $('<table>')
+            table.append("<thead><tr><th>HOME</th><th></th><th>AWAY</th></tr></thead>");
+            var tbody = $('<tbody>')
+
             for (i = 0; i < round.matches.length; i++) {
                 match = round.matches[i];
                 var p1 = match.players[0];
                 var p2 = match.players[1];
+                var p1Text = p1.name;
+                var p2Text = p2.name;
                 if (match.canBePlayed) {
-                    nodeText = '<a href="#" onclick="submitMatchResult(\''+match.id+'\',\''+p1.id+'\',\''+p1.name+'\');return false;">'+p1.name+'</a> vs '+
-                               '<a href="#" onclick="submitMatchResult(\''+match.id+'\',\''+p2.id+'\',\''+p2.name+'\');return false;">'+p2.name+'</a>';
+                    p1Text = '<a href="#" onclick="submitMatchResult(\''+match.id+'\',\''+p1.id+'\',\''+p1.name+'\');return false;">'+p1.name+'</a>';
+                    p2Text = '<a href="#" onclick="submitMatchResult(\''+match.id+'\',\''+p2.id+'\',\''+p2.name+'\');return false;">'+p2.name+'</a>';
                 } else {
-                    var p1Text = p1.name;
-                    var p2Text = p2.name;
                     if (p1.id == match.winner.id)
                         p1Text = "<b>"+p1.name+"</b>";
                     else
                         p2Text = "<b>"+p2.name+"</b>";
-                    nodeText = p1Text +' vs '+ p2Text
                 }
 
-                $('.bracket-container').append("<div style='padding: 10px 0px 10px 0px'>"+nodeText+"</div>");
+                var tr = $('<tr>')
+                tr.append('<td>'+p1Text+'</td><td>vs</td><td>'+p2Text+'</td>');
+                tbody.append(tr);
             }
+
+            table.append(tbody);
+            $('.bracket-container').append(table);
         }
 
         function drawTables(tables) {
