@@ -191,7 +191,7 @@ class RoundRobinTournament private constructor(
     }
 
     override fun updateRoundsAfterMatchCompleted() {
-        if (currentRound().isCompleted())
+        if (currentRound().isCompleted() && currentRoundIndex < (rounds.size-1))
             currentRoundIndex++
         recalculateTables()
     }
@@ -226,7 +226,7 @@ class RoundRobinTournament private constructor(
 
     override fun findPlayableMatches() = currentRound().findPlayableMatches()
 
-    override fun isOver() = currentRoundIndex >= rounds.size
+    override fun isOver() = currentRoundIndex == (rounds.size - 1) && rounds.last().isCompleted()
 
     private fun currentRound() = rounds[currentRoundIndex]
 }
