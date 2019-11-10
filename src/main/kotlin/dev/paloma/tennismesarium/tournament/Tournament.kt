@@ -231,7 +231,7 @@ class RoundRobinTournament private constructor(
     private fun currentRound() = rounds[currentRoundIndex]
 }
 
-data class ResultsSummary private constructor(
+class ResultsSummary private constructor(
         private var played: Int = 0,
         private var won: Int = 0,
         private var lost: Int = 0,

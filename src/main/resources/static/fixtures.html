@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Tournament details - Tennismesarium</title>
+    <link rel="stylesheet" href="fixtures.css">
 </head>
 <body>
     <br />
@@ -45,6 +46,27 @@
             }
         }
 
+        function drawTables(tables) {
+            $('.bracket-container').append("<hr /><h3>Tables</h3>");
+            var table = $('<table>')
+            table.append("<thead><tr><th>NAME</th><th>PLAYED</th><th>WON</th><th>LOST</th><th>STREAK</th><th>POINTS</th></tr></thead>");
+            var tbody = $('<tbody>')
+            for (i = 0; i < tables.length; i++) {
+                var name = tables[i].playerName;
+                var stats = tables[i].stats;
+                var tr = $('<tr>')
+                tr.append("<td><b>"+name+"</b></td>");
+                tr.append("<td>"+stats.played+"</td>");
+                tr.append("<td>"+stats.won+"</td>");
+                tr.append("<td>"+stats.lost+"</td>");
+                tr.append("<td>"+stats.bestStreak+"</td>");
+                tr.append("<td><b>"+stats.points+"</b></td>");
+                tbody.append(tr)
+            }
+            table.append(tbody);
+            $('.bracket-container').append(table);
+        }
+
         function drawInfoAndRounds(data) {
             $('#tournamentNameLabel').html("<h1>" + data.name + "</h1>");
             $('#tournamentIdInput').val(data.id);
@@ -56,6 +78,7 @@
             $('.bracket-container').html("");
 
             drawRound(data.rounds[data.currentRound]);
+            drawTables(data.tables);
         }
 
         function reloadTree() {
