@@ -13,7 +13,12 @@
     <input type="hidden" id="tournamentIdInput" />
 
     <div class="bracket-container">
-
+        <h3 id="roundTitleHeader"></h3>
+        <div id="selectedRoundNavigatorDiv"></div>
+        <div id="currentRoundDiv"></div>
+        <hr />
+        <h3>Tables</h3>
+        <div id="tablesDiv"></div>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"
@@ -23,8 +28,42 @@
     <script src="common.js"></script>
 
     <script type="application/javascript">
-        function drawRound(round, totalRounds) {
-            $('.bracket-container').append("<h3>Round "+round.sequence+" of "+totalRounds+"</h3>");
+        var currentRound;
+        var selectedRound;
+        var totalRounds;
+        var allRounds;
+
+        function showPreviousRound() {
+            selectedRound--;
+            drawRound();
+        }
+
+        function showNextRound() {
+            selectedRound++;
+            drawRound();
+        }
+
+        function showCurrentRound() {
+            selectedRound = currentRound;
+            drawRound();
+        }
+
+        function drawRound() {
+            var round = allRounds[selectedRound]
+
+            var previousLink = $('<button onclick="showPreviousRound()">&laquo;</button>');
+            var nextLink = $('<button onclick="showNextRound()">&raquo;</button>');
+            var currentLink = $('<button onclick="showCurrentRound()">current</button>');
+
+            previousLink.prop( "disabled", selectedRound <= 0 )
+            nextLink.prop( "disabled", selectedRound >= (totalRounds-1) )
+            currentLink.prop( "disabled", selectedRound == currentRound )
+
+            $('#roundTitleHeader').html("Round "+round.sequence+" of "+totalRounds);
+            $('#selectedRoundNavigatorDiv').html('')
+            $('#selectedRoundNavigatorDiv').append(previousLink)
+            $('#selectedRoundNavigatorDiv').append(currentLink)
+            $('#selectedRoundNavigatorDiv').append(nextLink)
             var table = $('<table>')
             table.append("<thead><tr><th>HOME</th><th></th><th>AWAY</th></tr></thead>");
             var tbody = $('<tbody>')
@@ -51,11 +90,10 @@
             }
 
             table.append(tbody);
-            $('.bracket-container').append(table);
+            $('#currentRoundDiv').html(table);
         }
 
         function drawTables(tables) {
-            $('.bracket-container').append("<hr /><h3>Tables</h3>");
             var table = $('<table>')
             table.append("<thead><tr><th>NAME</th><th>PLAYED</th><th>WON</th><th>LOST</th><th>STREAK</th><th>POINTS</th></tr></thead>");
             var tbody = $('<tbody>')
@@ -72,7 +110,7 @@
                 tbody.append(tr)
             }
             table.append(tbody);
-            $('.bracket-container').append(table);
+            $('#tablesDiv').html(table);
         }
 
         function drawInfoAndRounds(data) {
@@ -83,9 +121,11 @@
                 $('#tournamentWinnerName').html("<h2>Winner: " + data.winner.name + "</h2>");
             }
 
-            $('.bracket-container').html("");
-
-            drawRound(data.rounds[data.currentRound], data.rounds.length);
+            allRounds = data.rounds;
+            totalRounds = data.rounds.length;
+            currentRound = data.currentRound;
+            selectedRound = currentRound;
+            drawRound();
             drawTables(data.tables);
         }
 
