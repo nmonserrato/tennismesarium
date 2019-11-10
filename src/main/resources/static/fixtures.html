@@ -23,8 +23,8 @@
     <script src="common.js"></script>
 
     <script type="application/javascript">
-        function drawRound(round) {
-            $('.bracket-container').append("<h3>Round "+round.sequence+"</h3>");
+        function drawRound(round, totalRounds) {
+            $('.bracket-container').append("<h3>Round "+round.sequence+" of "+totalRounds+"</h3>");
             var table = $('<table>')
             table.append("<thead><tr><th>HOME</th><th></th><th>AWAY</th></tr></thead>");
             var tbody = $('<tbody>')
@@ -85,7 +85,7 @@
 
             $('.bracket-container').html("");
 
-            drawRound(data.rounds[data.currentRound]);
+            drawRound(data.rounds[data.currentRound], data.rounds.length);
             drawTables(data.tables);
         }
 
