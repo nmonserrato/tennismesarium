@@ -171,4 +171,8 @@ class RoundRobinRound(
     override fun winner() = throw UnsupportedOperationException("Round Robin rounds do not have a single winner")
 
     override fun findPlayableMatches() = games.filter { !it.isCompleted() }
+
+    fun findPlayedMatches() = games.filter { it.isCompleted() }
+
+    fun findPlayers() = games.flatMap { it.players() }.map { it.toString() }.toSet()
 }

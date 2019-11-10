@@ -6,7 +6,9 @@ import dev.paloma.tennismesarium.player.Player
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
+import kotlin.Comparator
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 import kotlin.collections.LinkedHashMap
 
 sealed class Tournament (
@@ -128,8 +130,13 @@ class RoundRobinTournament private constructor(
         override val name: String,
         override val created: ZonedDateTime = ZonedDateTime.now(),
         private val rounds: List<RoundRobinRound> = ArrayList(),
-        private var currentRoundIndex: Int = -1
+        private var currentRoundIndex: Int = 0,
+        private val tables: MutableMap<String, ResultsSummary> = HashMap()
 ) : Tournament(id, name, created, "FIXTURES") {
+    init {
+        recalculateTables()
+    }
+
     companion object {
         fun generateRounds(name: String, players: List<Player>): RoundRobinTournament {
             val fakePlayer = Player(UUID.randomUUID(), "Fake")
@@ -167,7 +174,7 @@ class RoundRobinTournament private constructor(
                 rounds.add(RoundRobinRound(r + 1, matchesOfRound))
             }
 
-            return RoundRobinTournament(id = UUID.randomUUID(), name = name, rounds = rounds, currentRoundIndex = 0)
+            return RoundRobinTournament(id = UUID.randomUUID(), name = name, rounds = rounds)
         }
 
         fun fromJson(json: Map<String, Any>): Tournament {
@@ -186,12 +193,32 @@ class RoundRobinTournament private constructor(
     override fun updateRoundsAfterMatchCompleted() {
         if (currentRound().isCompleted())
             currentRoundIndex++
+        recalculateTables()
+    }
+
+    private fun recalculateTables() {
+        tables.clear()
+        rounds.forEach { r ->
+            r.findPlayers().forEach { p -> if (!tables.containsKey(p)) tables[p] = ResultsSummary.atBeginning()}
+            r.findPlayedMatches().forEach { m ->
+                m.players().forEach { p ->
+                    val stats = tables[p.toString()]!!
+                    if (p.identifier() == m.winner().identifier())
+                        stats.addOneWin()
+                    else
+                        stats.addOneLost()
+                }
+            }
+        }
     }
 
     override fun toJson(): Map<String, Any> {
         val output = basicInfo()
         output["currentRound"] = currentRoundIndex
         output["rounds"] = rounds.map { it.toJson() }.toList()
+        output["tables"] = tables.toList().sortedWith(ResultsSummary.BY_POINTS_AND_WINS).map {
+            mapOf("playerName" to it.first, "stats" to it.second.toJson())
+        }
         return output
     }
 
@@ -203,3 +230,46 @@ class RoundRobinTournament private constructor(
 
     private fun currentRound() = rounds[currentRoundIndex]
 }
+
+data class ResultsSummary private constructor(
+        private var played: Int = 0,
+        private var won: Int = 0,
+        private var lost: Int = 0,
+        private var points: Int = 0,
+        private var bestStreak: Int = 0,
+        private var currentStreak: Int = 0
+){
+    companion object {
+        const val POINTS_PER_WIN = 2
+        private val BY_POINTS: Comparator<Pair<String, ResultsSummary>> = compareByDescending { it.second.points }
+        val BY_POINTS_AND_WINS = BY_POINTS.thenBy(compareByDescending { it.second.won }) { it }
+        fun atBeginning() = ResultsSummary ()
+    }
+
+    fun toJson(): Map<String, Any> {
+        return mapOf(
+                "played" to played,
+                "won" to won,
+                "lost" to lost,
+                "points" to points,
+                "bestStreak" to bestStreak
+        )
+    }
+
+    fun addOneWin() {
+        played++
+        won++
+        currentStreak++
+        points += POINTS_PER_WIN
+        if (currentStreak > bestStreak)
+            bestStreak = currentStreak
+    }
+
+    fun addOneLost() {
+        played++
+        lost++
+        currentStreak = 0
+    }
+}
+
+
