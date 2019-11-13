@@ -1,53 +1,29 @@
 package dev.paloma.tennismesarium.player
 
-import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
-import java.io.File
 import java.sql.ResultSet
 import java.util.*
 import javax.sql.DataSource
-import kotlin.collections.HashMap
+import kotlin.collections.HashSet
+import kotlin.streams.toList
 
 
 interface PlayersRepository {
     fun createAll(names: List<String>): List<Player>
+    fun findAll(): List<Player>
 }
 
 class InMemoryPlayersRepository : PlayersRepository {
-    override fun createAll(names: List<String>): List<Player> = names.map { Player(UUID.randomUUID(), it) }
-}
+    val players: MutableSet<Player> = HashSet()
 
-class FilePlayersRepository : PlayersRepository {
-    private val storageFile = File("database/players.json")
-    private val playersByName = HashMap<String, Player>(100)
-    private val mapper = ObjectMapper().configure(JsonParser.Feature.AUTO_CLOSE_SOURCE, true)
-
-    init {
-        storageFile.parentFile.mkdirs()
-        storageFile.createNewFile()
-
-        if (storageFile.length() > 0) {
-            mapper.readValue<List<Map<String, Any>>>(storageFile)
-                    .map { Pair(it["name"] as String, Player.fromJSON(it)) }
-                    .forEach {
-                        playersByName[it.first] = it.second
-                    }
-        }
+    override fun findAll(): List<Player> {
+        return players.toList()
     }
 
-    override fun createAll(names: List<String>): List<Player> {
-        return names
-                .map { playersByName.getOrPut(it, { Player(UUID.randomUUID(), it) }) }
-                .also { persistAll() }
-    }
-
-    private fun persistAll() {
-        storageFile.writeText(mapper.writeValueAsString(playersByName.values.map { it.toJson() }))
-    }
+    override fun createAll(names: List<String>): List<Player> =
+            names.stream().map { Player(UUID.randomUUID(), it) }.peek { players.add(it) }.toList()
 }
 
 class PostgresPlayersRepository private constructor(private val jdbc: NamedParameterJdbcTemplate) : PlayersRepository {
@@ -67,6 +43,10 @@ class PostgresPlayersRepository private constructor(private val jdbc: NamedParam
         return jdbc.query(readStmt, parameters, PlayerRowMapper)
     }
 
+    override fun findAll(): List<Player> {
+        val readStmt = "SELECT * FROM public.players WHERE name in (:names)"
+        return jdbc.query(readStmt, PlayerRowMapper)
+    }
 }
 
 object PlayerRowMapper : RowMapper<Player> {

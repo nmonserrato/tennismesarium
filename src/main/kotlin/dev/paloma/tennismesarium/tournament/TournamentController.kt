@@ -1,5 +1,7 @@
 package dev.paloma.tennismesarium.tournament
 
+import dev.paloma.tennismesarium.player.Player
+import dev.paloma.tennismesarium.player.Player.Companion.BY_NAME
 import dev.paloma.tennismesarium.player.PlayersRepository
 import dev.paloma.tennismesarium.tournament.SingleEliminationTournament.Companion.DESCENDING_CREATION_DATE
 import org.slf4j.LoggerFactory
@@ -57,13 +59,24 @@ class TournamentController {
 
     @GetMapping("list")
     fun getDetails(): ResponseEntity<List<Map<String, Any>>> {
-        logger.info("Requested list df tournaments")
+        logger.info("Requested list of tournaments")
         val tournaments = tournamentRepository
                 .findAll()
                 .sortedWith(DESCENDING_CREATION_DATE)
                 .map(Tournament::basicInfo)
 
         return ResponseEntity.ok(tournaments)
+    }
+
+    @GetMapping("availablePlayers")
+    fun getPlayers(): ResponseEntity<List<Map<String, Any>>> {
+        logger.info("Requested list of players")
+        val players = playersRepository
+                .findAll()
+                .sortedWith(BY_NAME)
+                .map(Player::toJson)
+
+        return ResponseEntity.ok(players)
     }
 }
 

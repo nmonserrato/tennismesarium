@@ -17,6 +17,8 @@ class Player(
     }
 
     companion object {
+        val BY_NAME = compareBy<Player> { it.name }
+
         fun fromJSON(json: Map<String, Any>): Player {
             val id = UUID.fromString(json["id"] as String)
             val name = json["name"] as String
