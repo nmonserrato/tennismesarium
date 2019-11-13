@@ -8,6 +8,7 @@
 <body>
     <h1>Create players</h1>
     <textarea rows="10" cols="20" id="playersToCreate"></textarea>
+    <br/> <br/>
     <button onclick="createPlayers()">Create all players</button>
 
     <hr />
@@ -17,15 +18,8 @@
     <input type="text" id="tournamentNameInput" value="Insert tournament name..."/>
     <br/> <br/>
     <h3>Select players</h3>
-    <textarea rows="30" cols="20" id="playersInput">Sergio
-Miquel
-Arjen
-Olivier
-Laia
-Juana
-Nino
-Diego
-Germanno</textarea>
+    <select multiple id="playersForTournament" size="20" style="height: 100%; width: 200px">
+    </select>
     <br/> <br/>
     <button onclick="createTournament('elimination')">Create single elimination</button>
     <button onclick="createTournament('fixtures')">Create fixtures</button>
@@ -36,9 +30,10 @@ Germanno</textarea>
 
 <script type="application/javascript">
     function createTournament(tournamentType) {
-        var tournamentName = document.getElementById("tournamentNameInput").value
-        var playersLines = document.getElementById("playersInput").value.split("\n")
-        var postData = { "tournamentName": tournamentName, "playerNames": playersLines, "mode": tournamentType };
+        var tournamentName =  $('#tournamentNameInput').val();
+        var playerIds = $('#playersForTournament').val();
+
+        var postData = { "tournamentName": tournamentName, "playerIds": playerIds, "mode": tournamentType };
         $.ajax({
             type: "POST",
             url: "/api/tournament",
@@ -73,6 +68,19 @@ Germanno</textarea>
         });
     }
 
+    function preloadPlayers() {
+        $.getJSON( "/api/players/available", function( data ) {
+            $('#playersForTournament').empty();
+            if(data.length > 0) {
+                for (i = 0; i < data.length; i++) {
+                    var p = data[i];
+                    $('#playersForTournament').append('<option value="'+p.id+'">'+p.name+'</option>')
+                }
+            }
+        });
+    }
+
+    preloadPlayers();
 </script>
 </body>
 </html>

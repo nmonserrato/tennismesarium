@@ -29,8 +29,8 @@ class TournamentController {
     @PostMapping
     fun createTournament(@RequestBody @Validated request: TournamentCreationRequest): ResponseEntity<Unit> {
         logger.info("Requested to create tournament of type {} with name {} and players {}",
-                request.mode, request.tournamentName, request.playerNames)
-        val players = playersRepository.createAll(request.playerNames)
+                request.mode, request.tournamentName, request.playerIds)
+        val players = playersRepository.findAll().filter { request.playerIds.contains(it.identifier()) }
 
         val tournament = if(request.mode == "elimination")
             Tournament.createSingleElimination(request.tournamentName, players)
@@ -72,5 +72,5 @@ class TournamentController {
 data class TournamentCreationRequest(
         @NotNull val tournamentName: String,
         @NotNull val mode: String,
-        @NotNull @Size(min = 1) val playerNames: List<String>
+        @NotNull @Size(min = 1) val playerIds: List<UUID>
 )
