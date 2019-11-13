@@ -61,8 +61,8 @@
                     team2Class = (winner===team2) ? "winner" : "loser";
                 } else {
                     clickable = true;
-                    submitLink1 = 'onclick="submitMatchResultAsync(\''+round.match.id+'\',\''+p1.id+'\',\''+p1.name+'\');return false;"';
-                    submitLink2 = 'onclick="submitMatchResultAsync(\''+round.match.id+'\',\''+p2.id+'\',\''+p2.name+'\');return false;"';
+                    submitLink1 = 'onclick="submitMatchResult(\''+round.match.id+'\',\''+p1.id+'\',\''+p1.name+'\');return false;"';
+                    submitLink2 = 'onclick="submitMatchResult(\''+round.match.id+'\',\''+p2.id+'\',\''+p2.name+'\');return false;"';
                 }
             }
             return baseDiv
@@ -147,40 +147,7 @@
             });
         }
 
-        function waitForEvents() {
-            this.source = null;
-
-            this.startStream = function () {
-                console.log("Starting stream...");
-                var tournamentId = urlParam("id");
-                this.source = new EventSource("/api/v2/tournament/"+tournamentId);
-                this.source.addEventListener("message", function (event) {
-                    console.log("Received update for tournament "+tournamentId)
-                    var tournament = JSON.parse(event.data);
-                    drawTree(tournament);
-                });
-
-                this.source.onerror = function () {
-                    this.close();
-                };
-
-            };
-
-            this.stopStream = function() {
-                console.log("Closing stream...");
-                this.source.close();
-            };
-
-            window.onload = function() {
-                this.startStream();
-            };
-            window.onbeforeunload = function() {
-                this.stopStream();
-            };
-        }
-
         reloadTree();
-        waitForEvents();
     </script>
 </body>
 </html>

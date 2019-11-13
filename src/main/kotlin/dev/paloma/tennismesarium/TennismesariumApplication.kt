@@ -2,6 +2,7 @@ package dev.paloma.tennismesarium
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import dev.paloma.tennismesarium.match.InMemoryMatchRepository
 import dev.paloma.tennismesarium.player.InMemoryPlayersRepository
 import dev.paloma.tennismesarium.player.PostgresPlayersRepository
 import dev.paloma.tennismesarium.tournament.InMemoryTournamentRepository
@@ -61,4 +62,8 @@ class MainConfig {
 			InMemoryPlayersRepository()
 		else
 			PostgresPlayersRepository(dataSource)
+
+	@Bean
+	fun matchRepository(@Autowired dataSource: DataSource?) =
+			InMemoryMatchRepository()
 }

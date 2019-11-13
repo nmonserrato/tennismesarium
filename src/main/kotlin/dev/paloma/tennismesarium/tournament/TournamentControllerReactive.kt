@@ -30,7 +30,7 @@ class TournamentControllerReactive {
     }
 
     @EventListener
-    @Order(1)
+    @Order(10)
     fun sendEventToFrontEnd(event: MatchCompletedEvent) {
         streams[event.tournament.identifier()]?.removeIf { it.isCancelled }
         streams[event.tournament.identifier()]?.forEach { it.next(event.tournament.toJson()) }

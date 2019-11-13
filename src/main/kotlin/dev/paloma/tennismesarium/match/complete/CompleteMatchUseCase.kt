@@ -1,5 +1,6 @@
 package dev.paloma.tennismesarium.match.complete
 
+import dev.paloma.tennismesarium.match.MatchRepository
 import dev.paloma.tennismesarium.tournament.Tournament
 import dev.paloma.tennismesarium.tournament.TournamentRepository
 import org.springframework.context.ApplicationEventPublisher
@@ -15,7 +16,9 @@ data class CompleteMatchUseCaseValidationError(val message: String) : CompleteMa
 @Service
 class CompleteMatchUseCase(
     private val eventPublisher: ApplicationEventPublisher,
-    private val tournamentRepository: TournamentRepository) {
+    private val tournamentRepository: TournamentRepository,
+    private val matchRepository: MatchRepository
+    ) {
     fun execute(matchId: UUID, tournamentId: UUID, winnerId: UUID): CompleteMatchUseCaseResult {
         val tournament = tournamentRepository.find(tournamentId)
             ?: return CompleteMatchUseCaseValidationError("Tournament $tournamentId not found")
@@ -28,14 +31,22 @@ class CompleteMatchUseCase(
             ?: return CompleteMatchUseCaseValidationError(
                 "Player $winnerId is not playing match $matchId")
 
+        match.complete(winnerId)
+
         eventPublisher.publishEvent(MatchCompletedEvent(match, tournament, player))
         return CompleteMatchUseCaseSuccess
     }
 
     @EventListener
-    @Order(0)
+    @Order(5)
     fun updateTournamentAfterMatchCompleted(event: MatchCompletedEvent) {
         Tournament.replayEvent(event)
         tournamentRepository.store(event.tournament)
+    }
+
+    @EventListener
+    @Order(0)
+    fun storeMatchCompletedEvent(event: MatchCompletedEvent) {
+        matchRepository.storeMatchCompletedEvent(event);
     }
 }
