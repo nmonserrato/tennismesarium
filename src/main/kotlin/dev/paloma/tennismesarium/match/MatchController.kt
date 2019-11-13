@@ -11,7 +11,7 @@ import javax.validation.constraints.NotNull
 
 @RestController
 @RequestMapping("/api/match")
-class OldMatchController {
+class MatchController {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 

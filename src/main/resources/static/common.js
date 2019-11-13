@@ -25,6 +25,7 @@ function readOnly() {
     if (typeof urlParam('rw') !== 'undefined') return;
     $(".withPointer").prop('onclick', null);
     $("a").prop('onclick', null);
+    $("img").prop('onclick', null);
 }
 
 var alternativeView;

@@ -67,17 +67,6 @@ class TournamentController {
 
         return ResponseEntity.ok(tournaments)
     }
-
-    @GetMapping("availablePlayers")
-    fun getPlayers(): ResponseEntity<List<Map<String, Any>>> {
-        logger.info("Requested list of players")
-        val players = playersRepository
-                .findAll()
-                .sortedWith(BY_NAME)
-                .map(Player::toJson)
-
-        return ResponseEntity.ok(players)
-    }
 }
 
 data class TournamentCreationRequest(

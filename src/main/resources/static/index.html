@@ -3,8 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <title>Tennismesarium</title>
+    <link rel="stylesheet" href="home.css">
 </head>
 <body>
-    <h1>Yup, I'm up and running</h1>
+<h1>Welcome! <br />Here's the list of tournaments</h1>
+<div id="listTournamentsDiv"></div>
+
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"
+        integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+        crossorigin="anonymous"></script>
+<script src="common.js"></script>
+<script type="application/javascript">
+        function tournamentToRow(t) {
+        var openLink;
+        if (t.mode == 'SINGLE_ELIMINATION')
+            openLink = '<a href="/brackets.html?id='+t.id+'">'+t.name+'</a>';
+        else
+            openLink = '<a href="/fixtures.html?id='+t.id+'">'+t.name+'</a>';
+        var deleteImg = '<img src="delete.png" onclick="deleteTournament(\''+t.id+'\')" '+
+            'width="16" height="16" onmouseover="" style="cursor: pointer;"/>';
+
+        return $('<tr>')
+            .append($('<td>').append(openLink))
+            .append($('<td>').append(t.created))
+            .append($('<td>').append(t.status))
+            .append($('<td>').append(deleteImg));
+    }
+
+    function loadAvailableTournaments() {
+        $.getJSON( "/api/tournament/list", function( data ) {
+            $('#listTournamentsDiv').empty();
+            if(data.length > 0) {
+                var table = $('<table>').append($('<thead>').append(
+                    $('<tr>')
+                        .append($('<td>').append("Name"))
+                        .append($('<td>').append("Created on"))
+                        .append($('<td>').append("Status"))
+                        .append($('<td>').append("Delete"))
+                ));
+                for (i = 0; i < data.length; i++) {
+                    table.append($('<tbody>').append(tournamentToRow(data[i])));
+                }
+                $('#listTournamentsDiv').append(table);
+            } else {
+                $('#listTournamentsDiv').html("...nope, no tournaments available");
+            }
+            readOnly();
+        });
+    }
+
+    function deleteTournament(tournamentId) {
+        if (confirm("Are ou sure you want to delete this tournament?")) {
+            $.ajax({
+                type: "DELETE",
+                url: "/api/tournament/"+tournamentId,
+                complete: function (request, textStatus) {
+                    loadAvailableTournaments();
+                },
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                traditional: true
+            });
+        }
+    }
+
+
+    loadAvailableTournaments();
+</script>
 </body>
 </html>
