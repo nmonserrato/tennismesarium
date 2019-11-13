@@ -44,7 +44,7 @@ class PostgresPlayersRepository private constructor(private val jdbc: NamedParam
     }
 
     override fun findAll(): List<Player> {
-        val readStmt = "SELECT * FROM public.players WHERE name in (:names)"
+        val readStmt = "SELECT * FROM public.players"
         return jdbc.query(readStmt, PlayerRowMapper)
     }
 }
