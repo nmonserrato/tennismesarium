@@ -39,6 +39,12 @@ function submitMatchResultAsync(matchId, winnerId, playerName) {
     }
 }
 
+function readOnly() {
+    if (typeof urlParam('rw') !== 'undefined') return;
+    $(".withPointer").prop('onclick', null);
+    $("a").prop('onclick', null);
+}
+
 var alternativeView;
 var alternativeViewName;
 if (window.location.href.indexOf("tree.html") !== -1) {

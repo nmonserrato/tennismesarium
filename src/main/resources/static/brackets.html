@@ -144,6 +144,7 @@
             var tournamentId = urlParam("id");
             $.getJSON( "/api/tournament/"+tournamentId, function( data ) {
                 drawTree(data);
+                readOnly();
             });
         }
 
