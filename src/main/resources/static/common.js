@@ -38,6 +38,10 @@ if (window.location.href.indexOf("tree.html") !== -1) {
     alternativeView = window.location.href.replace("brackets.html", "tree.html");
 }
 
+if (window.location.href.indexOf("index.html") === -1) {
+    $('<a href="index.html" style="position: absolute;left: 0; top: 0; display: block; margin: 20px 0px 0px 30px;">Back to home</a>').appendTo(document.body);
+}
+
 if (typeof alternativeViewName !== 'undefined') {
     $('<a href="'+alternativeView+'" style="position: absolute;right: 0; top: 0; display: block; margin: 20px 30px 0px 0px;">'+alternativeViewName+'</a>').appendTo(document.body);
 }
