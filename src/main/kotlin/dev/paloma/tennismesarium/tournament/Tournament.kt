@@ -1,12 +1,10 @@
 package dev.paloma.tennismesarium.tournament
 
 import dev.paloma.tennismesarium.match.Match
-import dev.paloma.tennismesarium.match.complete.MatchCompletedEvent
 import dev.paloma.tennismesarium.player.Player
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
-import kotlin.Comparator
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.collections.LinkedHashMap
@@ -37,7 +35,6 @@ sealed class Tournament (
         return output
     }
 
-    // make it private once v2 is live?
     fun completeMatch(matchId: UUID, winnerId: UUID) {
         val match = findPlayableMatch(matchId)
                 ?: throw IllegalArgumentException("No match $matchId found in tournament")
@@ -55,10 +52,6 @@ sealed class Tournament (
 
         fun createFixtures(tournamentName: String, players: List<Player>): Tournament {
             return RoundRobinTournament.generateRounds(tournamentName, players)
-        }
-
-        fun replayEvent(event: MatchCompletedEvent) {
-            event.tournament.completeMatch(event.match.identifier(), event.winner.identifier())
         }
 
         fun fromJson(json: Map<String, Any>): Tournament {
