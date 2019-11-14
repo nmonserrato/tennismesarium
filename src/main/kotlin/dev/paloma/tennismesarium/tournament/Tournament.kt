@@ -20,7 +20,7 @@ sealed class Tournament (
     abstract fun findPlayableMatch(matchId: UUID): Match?
     abstract fun findPlayableMatches(): List<Match>
 
-    abstract fun updateRoundsAfterMatchCompleted()
+    abstract fun onMatchCompleted()
     abstract fun isOver(): Boolean
 
     fun identifier() = id
@@ -34,14 +34,6 @@ sealed class Tournament (
         output["created"] = formatter.format(created)
         return output
     }
-
-    fun completeMatch(matchId: UUID, winnerId: UUID) {
-        val match = findPlayableMatch(matchId)
-                ?: throw IllegalArgumentException("No match $matchId found in tournament")
-        match.complete(winnerId)
-        updateRoundsAfterMatchCompleted()
-    }
-
 
     companion object {
         val formatter: DateTimeFormatter = DateTimeFormatter.RFC_1123_DATE_TIME
@@ -100,7 +92,7 @@ class SingleEliminationTournament private constructor(
         }
     }
 
-    override fun updateRoundsAfterMatchCompleted() {
+    override fun onMatchCompleted() {
         final.updateAfterMatchPlayed()
     }
 
@@ -183,9 +175,10 @@ class RoundRobinTournament private constructor(
 
     }
 
-    override fun updateRoundsAfterMatchCompleted() {
+    override fun onMatchCompleted() {
         if (currentRound().isCompleted() && currentRoundIndex < (rounds.size-1))
             currentRoundIndex++
+
         recalculateTables()
     }
 

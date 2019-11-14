@@ -1,13 +1,13 @@
 package dev.paloma.tennismesarium.match
 
 interface MatchRepository {
-    fun storeMatchCompletedEvent()
+    fun storeCompletedMatch(match: Match)
 }
 
 class InMemoryMatchRepository : MatchRepository {
     private val matches: MutableList<Match> = ArrayList()
 
-    override fun storeMatchCompletedEvent() {
-        //TODO("Implement shit")
+    override fun storeCompletedMatch(match: Match) {
+        matches.add(match)
     }
 }
