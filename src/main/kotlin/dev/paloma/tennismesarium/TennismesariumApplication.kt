@@ -2,7 +2,9 @@ package dev.paloma.tennismesarium
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import dev.paloma.tennismesarium.match.InMemoryMatchRepository
+import dev.paloma.tennismesarium.match.InMemoryMatchResultsRepository
+import dev.paloma.tennismesarium.match.MatchResultsRepository
+import dev.paloma.tennismesarium.match.PostgresMatchResultsRepository
 import dev.paloma.tennismesarium.player.InMemoryPlayersRepository
 import dev.paloma.tennismesarium.player.PostgresPlayersRepository
 import dev.paloma.tennismesarium.tournament.InMemoryTournamentRepository
@@ -16,6 +18,7 @@ import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import java.net.URISyntaxException
+import java.util.*
 import javax.sql.DataSource
 
 
@@ -64,6 +67,8 @@ class MainConfig {
 			PostgresPlayersRepository(dataSource)
 
 	@Bean
-	fun matchRepository(@Autowired dataSource: DataSource?) =
-			InMemoryMatchRepository()
+	fun matchResultsRepository(@Autowired dataSource: DataSource?) =
+			Optional.ofNullable(dataSource)
+					.map { PostgresMatchResultsRepository(it) as MatchResultsRepository }
+					.orElse(InMemoryMatchResultsRepository())
 }

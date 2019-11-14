@@ -19,7 +19,7 @@ class MatchController {
     private lateinit var tournamentRepository: TournamentRepository
 
     @Autowired
-    private lateinit var matchRepository: MatchRepository
+    private lateinit var matchResultsRepository: MatchResultsRepository
 
     @PutMapping("{matchId}")
     fun completeMatch(
@@ -36,7 +36,7 @@ class MatchController {
                 ?: throw IllegalArgumentException("No match $matchId found in tournament")
 
         match.complete(request.winnerId)
-        matchRepository.storeCompletedMatch(match)
+        matchResultsRepository.storeMatchResult(match)
 
         tournament.onMatchCompleted()
         tournamentRepository.store(tournament)
