@@ -35,17 +35,17 @@ class PostgresMatchResultsRepository private constructor(private val jdbc: Named
 
     override fun storeMatchResult(match: Match) {
         val insertStmt = "INSERT INTO public.matchresults (player1, player2, winner) " +
-                "VALUES ( uuid(:p1), uuid(:p2). uuid(:w)) ON CONFLICT DO NOTHING"
+                "VALUES ( uuid(:p1), uuid(:p2), uuid(:w))"
 
         jdbc.update(insertStmt, mapOf(
                 "p1" to match.players()[0].identifier().toString(),
                 "p2" to match.players()[1].identifier().toString(),
-                "p3" to match.winner().identifier().toString())
+                "w" to match.winner().identifier().toString())
         )
     }
 
     override fun loadAllResults(): List<MatchResult> {
-        val readStmt = "SELECT * FROM public.matchresults ORDER BY created"
+        val readStmt = "SELECT player1, player2, winner FROM public.matchresults ORDER BY created"
         return jdbc.query(readStmt, MatchResultRowMapper)
     }
 }
