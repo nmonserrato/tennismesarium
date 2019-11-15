@@ -43,7 +43,7 @@ sealed class Tournament (
         }
 
         fun createFixtures(tournamentName: String, players: List<Player>): Tournament {
-            return RoundRobinTournament.generateRounds(tournamentName, players)
+            return RoundRobinTournament.generateRounds(tournamentName, players.shuffled())
         }
 
         fun fromJson(json: Map<String, Any>): Tournament {
@@ -226,7 +226,7 @@ class ResultsSummary private constructor(
         private var currentStreak: Int = 0
 ){
     companion object {
-        const val POINTS_PER_WIN = 2
+        const val POINTS_PER_WIN = 3
         private val BY_POINTS: Comparator<Pair<String, ResultsSummary>> = compareByDescending { it.second.points }
         val BY_POINTS_AND_WINS = BY_POINTS.thenBy(compareByDescending { it.second.won }) { it }
         fun atBeginning() = ResultsSummary ()
