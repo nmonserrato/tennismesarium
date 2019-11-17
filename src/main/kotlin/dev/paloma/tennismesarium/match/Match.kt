@@ -55,7 +55,8 @@ class SinglesMatch(
         output["id"] = id.toString()
         output["players"] = listOf(players.first.toJson(), players.second.toJson())
         output["canBePlayed"] = !isCompleted()
-        if (!isCompleted()) output["expectation"] = RatingSystem.elo().expectationToWin(players.first, players.second)
+        if (!isCompleted()) output["expectation"] =
+                RatingSystem.elo().expectationToWin(players.first, players.second).times(100).toInt()
         winner?.let { output["winner"] = it.toJson() }
         return output
     }
