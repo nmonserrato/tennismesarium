@@ -4,7 +4,8 @@ import dev.paloma.tennismesarium.match.Match
 import java.util.*
 
 interface RatingSystem {
-    fun calculateRatings(matches: List<Match>) : List<PlayerRating>
+    fun reCalculateRatings(matches: List<Match>) : List<PlayerRating>
+    fun updateRatingsAfterMatch(match: Match): List<PlayerRating>
 }
 
 data class MatchResult (

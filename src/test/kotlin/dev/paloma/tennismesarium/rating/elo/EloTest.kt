@@ -28,6 +28,17 @@ internal class EloTest {
     }
 
     @Test
+    internal fun `new score after expected win`() {
+        val p1 = PlayerRating(p1, 1700.0)
+        val p2 = PlayerRating(p2, 1300.0)
+
+        val (newRating1, newRating2) = elo.updateRatingsAfterMatch(p1, p2, p1.playerId)
+
+        assertEquals(1702.0, newRating1.rating)
+        assertEquals(1298.0, newRating2.rating)
+    }
+
+    @Test
     internal fun `new score after unexpected loss`() {
         val p1 = PlayerRating(p1, 1700.0)
         val p2 = PlayerRating(p2, 1300.0)

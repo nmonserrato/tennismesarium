@@ -5,7 +5,11 @@ import dev.paloma.tennismesarium.rating.PlayerRating
 import dev.paloma.tennismesarium.rating.RatingSystem
 
 class Glicko2Engine : RatingSystem {
-    override fun calculateRatings(matches: List<Match>): List<PlayerRating> {
+    override fun updateRatingsAfterMatch(match: Match): List<PlayerRating> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun reCalculateRatings(matches: List<Match>): List<PlayerRating> {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 }
