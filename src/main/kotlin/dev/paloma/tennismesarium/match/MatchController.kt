@@ -1,5 +1,6 @@
 package dev.paloma.tennismesarium.match
 
+import dev.paloma.tennismesarium.rating.RatingSystem
 import dev.paloma.tennismesarium.tournament.TournamentRepository
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -21,6 +22,9 @@ class MatchController {
     @Autowired
     private lateinit var matchResultsRepository: MatchResultsRepository
 
+    @Autowired
+    private lateinit var ratingSystem: RatingSystem
+
     @PutMapping("{matchId}")
     fun completeMatch(
             @PathVariable("matchId") matchId: UUID,
@@ -40,6 +44,8 @@ class MatchController {
 
         tournament.onMatchCompleted()
         tournamentRepository.store(tournament)
+
+        ratingSystem.updateRatingsAfterMatch(match.result())
 
         logger.info("Match {} played and tournament {} updated", matchId, request.tournamentId)
         return ResponseEntity.accepted().build()

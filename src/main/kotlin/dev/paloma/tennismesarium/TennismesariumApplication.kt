@@ -6,9 +6,13 @@ import dev.paloma.tennismesarium.match.InMemoryMatchResultsRepository
 import dev.paloma.tennismesarium.match.MatchResultsRepository
 import dev.paloma.tennismesarium.match.PostgresMatchResultsRepository
 import dev.paloma.tennismesarium.player.InMemoryPlayersRepository
+import dev.paloma.tennismesarium.player.PlayersRepository
 import dev.paloma.tennismesarium.player.PostgresPlayersRepository
+import dev.paloma.tennismesarium.rating.RatingSystem
+import dev.paloma.tennismesarium.rating.elo.Elo
 import dev.paloma.tennismesarium.tournament.InMemoryTournamentRepository
 import dev.paloma.tennismesarium.tournament.PostgresTournamentRepository
+import dev.paloma.tennismesarium.tournament.TournamentRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.boot.autoconfigure.SpringBootApplication
@@ -54,21 +58,29 @@ class MainConfig {
 
 	@Bean
 	fun tournamentRepository(@Autowired dataSource: DataSource?) =
-		if (dataSource == null)
-			InMemoryTournamentRepository()
-		else
-			PostgresTournamentRepository(dataSource)
+			Optional.ofNullable(dataSource)
+					.map { PostgresTournamentRepository(it) as TournamentRepository }
+					.orElse(InMemoryTournamentRepository())
 
 	@Bean
 	fun playersRepository(@Autowired dataSource: DataSource?) =
-		if (dataSource == null)
-			InMemoryPlayersRepository()
-		else
-			PostgresPlayersRepository(dataSource)
+			Optional.ofNullable(dataSource)
+					.map { PostgresPlayersRepository(it) as PlayersRepository }
+					.orElse(InMemoryPlayersRepository())
 
 	@Bean
 	fun matchResultsRepository(@Autowired dataSource: DataSource?) =
 			Optional.ofNullable(dataSource)
 					.map { PostgresMatchResultsRepository(it) as MatchResultsRepository }
 					.orElse(InMemoryMatchResultsRepository())
+
+	@Bean
+	fun eloRatingSystem(matchResultsRepository: MatchResultsRepository): RatingSystem {
+		val allMatches = matchResultsRepository.loadAllResults()
+
+		val elo = Elo()
+		elo.reCalculateRatings(allMatches)
+
+		return elo
+	}
 }

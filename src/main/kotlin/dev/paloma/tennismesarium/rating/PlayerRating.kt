@@ -4,5 +4,6 @@ import java.util.*
 
 data class PlayerRating (
         val playerId: UUID,
-        val rating: Double
+        val rating: Double,
+        val lastIncrement: Double
 )

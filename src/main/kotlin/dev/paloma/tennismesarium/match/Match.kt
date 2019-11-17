@@ -1,6 +1,7 @@
 package dev.paloma.tennismesarium.match
 
 import dev.paloma.tennismesarium.player.Player
+import dev.paloma.tennismesarium.rating.MatchResult
 import java.lang.IllegalArgumentException
 import java.lang.IllegalStateException
 import java.util.*
@@ -12,6 +13,7 @@ sealed class Match {
     abstract fun isCompleted(): Boolean
     abstract fun winner(): Player
     abstract fun players(): List<Player>
+    abstract fun result(): MatchResult
 
     companion object {
         fun between(player1: Player, player2: Player): Match {
@@ -69,4 +71,10 @@ class SinglesMatch(
     }
 
     override fun players(): List<Player> = listOf(players.first, players.second)
+
+    override fun result(): MatchResult = MatchResult(
+            this.players.first.identifier(),
+            this.players.second.identifier(),
+            this.winner!!.identifier()
+    )
 }
