@@ -1,6 +1,6 @@
 package dev.paloma.tennismesarium.player
 
-import dev.paloma.tennismesarium.match.MatchCompletionRequest
+import dev.paloma.tennismesarium.rating.RatingSystem
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
@@ -16,6 +16,9 @@ class PlayersController {
     @Autowired
     private lateinit var playersRepository: PlayersRepository
 
+    @Autowired
+    private lateinit var ratingSystem: RatingSystem
+
     @GetMapping("available")
     fun getPlayers(): ResponseEntity<List<Map<String, Any>>> {
         logger.info("Requested list of players")
@@ -27,6 +30,22 @@ class PlayersController {
         return ResponseEntity.ok(players)
     }
 
+    @GetMapping("ratings")
+    fun getRatings(): ResponseEntity<List<PlayerWithRating>> {
+        logger.info("Requested ratings of all players")
+        val ratings = ratingSystem.getCurrentRatings()
+        val players = playersRepository.findAll().map { Pair(it.identifier(), it) }.toMap()
+
+        return ResponseEntity.ok(
+                ratings.map {
+                    PlayerWithRating(
+                            players[it.playerId].toString(),
+                            it.rating,
+                            it.lastIncrement)
+                }
+        )
+    }
+
     @PostMapping
     fun createPlayers(@RequestBody @Validated request: List<String>): ResponseEntity<Unit> {
         logger.info("Creating all players (if not exist) with names {}", request)
@@ -35,3 +54,8 @@ class PlayersController {
         return ResponseEntity.noContent().build()
     }
 }
+
+data class PlayerWithRating (
+        val name: String,
+        val rating: Double,
+        val lastIncrement: Double)

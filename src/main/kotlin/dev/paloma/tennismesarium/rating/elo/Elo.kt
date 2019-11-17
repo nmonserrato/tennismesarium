@@ -1,5 +1,6 @@
 package dev.paloma.tennismesarium.rating.elo
 
+import dev.paloma.tennismesarium.player.Player
 import dev.paloma.tennismesarium.rating.MatchResult
 import dev.paloma.tennismesarium.rating.PlayerRating
 import dev.paloma.tennismesarium.rating.RatingSystem
@@ -35,8 +36,9 @@ class Elo : RatingSystem {
 
     override fun getCurrentRatings() = currentRatings.values.sortedByDescending { it.rating }.toList()
 
-    fun expectationToWin(player1: PlayerRating, player2: PlayerRating) =
-        1.0 / (1.0 + 10.0.pow((player2.rating - player1.rating) / 400.0))
+    fun expectationToWin(player1: Player, player2: Player) = expectationToWin(
+            scoreFor(player1.identifier()), scoreFor(player2.identifier())
+    )
 
     fun updateRatingsAfterMatch(p1: PlayerRating, p2: PlayerRating, winner: UUID): Pair<PlayerRating, PlayerRating> {
         val outcome = if (p1.playerId == winner) 1.0 else 0.0
@@ -46,7 +48,10 @@ class Elo : RatingSystem {
         return Pair(newP1Rating, newP2Rating)
     }
 
-    private fun scoreFor(p1Id: UUID) = currentRatings.getOrDefault(p1Id, startingRating(p1Id))
+    private fun scoreFor(player: UUID) = currentRatings.getOrDefault(player, startingRating(player))
 
     private fun startingRating(p1Id: UUID) = PlayerRating(p1Id, STARTING_SCORE, 0.0)
+
+    private fun expectationToWin(player1: PlayerRating, player2: PlayerRating) =
+            1.0 / (1.0 + 10.0.pow((player2.rating - player1.rating) / 400.0))
 }

@@ -78,7 +78,7 @@ class MainConfig {
 	fun eloRatingSystem(matchResultsRepository: MatchResultsRepository): RatingSystem {
 		val allMatches = matchResultsRepository.loadAllResults()
 
-		val elo = Elo()
+		val elo = RatingSystem.elo()
 		elo.reCalculateRatings(allMatches)
 
 		return elo

@@ -2,6 +2,7 @@ package dev.paloma.tennismesarium.match
 
 import dev.paloma.tennismesarium.player.Player
 import dev.paloma.tennismesarium.rating.MatchResult
+import dev.paloma.tennismesarium.rating.RatingSystem
 import java.lang.IllegalArgumentException
 import java.lang.IllegalStateException
 import java.util.*
@@ -54,6 +55,7 @@ class SinglesMatch(
         output["id"] = id.toString()
         output["players"] = listOf(players.first.toJson(), players.second.toJson())
         output["canBePlayed"] = !isCompleted()
+        if (!isCompleted()) output["expectation"] = RatingSystem.elo().expectationToWin(players.first, players.second)
         winner?.let { output["winner"] = it.toJson() }
         return output
     }
