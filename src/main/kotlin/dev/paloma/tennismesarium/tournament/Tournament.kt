@@ -43,7 +43,7 @@ sealed class Tournament (
         }
 
         fun createFixtures(tournamentName: String, players: List<Player>): Tournament {
-            return RoundRobinTournament.generateRounds(tournamentName, players.shuffled(), false)
+            return RoundRobinTournament.generateRounds(tournamentName, players.shuffled(Random(35)), false)
         }
 
         fun fromJson(json: Map<String, Any>): Tournament {
