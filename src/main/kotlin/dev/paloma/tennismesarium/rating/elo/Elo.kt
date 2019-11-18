@@ -12,9 +12,17 @@ class Elo : RatingSystem {
     companion object {
         private const val K = 32
         private const val STARTING_SCORE = 1200.0
+
+        fun withRatings(ratings: Map<UUID, PlayerRating>): Elo {
+            val elo = Elo()
+            elo.currentRatings.putAll(ratings)
+            return elo
+        }
+
     }
 
     private val currentRatings = HashMap<UUID, PlayerRating>()
+
 
     override fun updateRatingsAfterMatch(match: MatchResult): List<PlayerRating> {
         val p1 = match.playerOne

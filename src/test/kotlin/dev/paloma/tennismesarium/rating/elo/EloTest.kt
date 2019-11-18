@@ -1,5 +1,6 @@
 package dev.paloma.tennismesarium.rating.elo
 
+import dev.paloma.tennismesarium.player.Player
 import dev.paloma.tennismesarium.rating.PlayerRating
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -9,22 +10,20 @@ internal class EloTest {
 
     private val p1 = UUID.randomUUID()
     private val p2 = UUID.randomUUID()
-    private val elo = Elo()
+    private var elo  = Elo()
 
     @Test
     internal fun `expectation to win for two players with same score`() {
-        val p1 = PlayerRating(p1, 1500.0)
-        val p2 = PlayerRating(p2, 1500.0)
+        setupPlayersWithRating(1500.0, 1500.0)
 
-        assertEquals(0.5, elo.expectationToWin(p1, p2))
+        assertEquals(0.5f, expectationToWin(), 0.01f)
     }
 
     @Test
     internal fun `expectation to win for two players with different score`() {
-        val p1 = PlayerRating(p1, 1700.0)
-        val p2 = PlayerRating(p2, 1300.0)
+        setupPlayersWithRating(1700.0, 1300.0)
 
-        assertEquals(0.9f, elo.expectationToWin(p1, p2).toFloat(), 0.01f)
+        assertEquals(0.9f, expectationToWin(), 0.01f)
     }
 
     @Test
@@ -48,4 +47,17 @@ internal class EloTest {
         assertEquals(1671.0, newRating1.rating)
         assertEquals(1329.0, newRating2.rating)
     }
+
+    private fun setupPlayersWithRating(rating1: Double, rating2: Double) {
+        elo = Elo.withRatings(
+                mapOf(
+                        p1 to PlayerRating(p1, rating1),
+                        p2 to PlayerRating(p2, rating2)
+                )
+        )
+    }
+
+    private fun expectationToWin() =
+            elo.expectationToWin(Player(p1, "p1"), Player(p2, "p2")).toFloat()
+
 }
