@@ -23,8 +23,7 @@ class Elo : RatingSystem {
 
     private val currentRatings = HashMap<UUID, PlayerRating>()
 
-
-    override fun updateRatingsAfterMatch(match: MatchResult): List<PlayerRating> {
+    override fun updateRatingsAfterMatch(match: MatchResult) {
         val p1 = match.playerOne
         val p2 = match.playerTwo
 
@@ -32,23 +31,24 @@ class Elo : RatingSystem {
 
         currentRatings[p1] = newP1
         currentRatings[p2] = newP2
-
-        return getCurrentRatings()
     }
 
-    override fun reCalculateRatings(matches: List<MatchResult>): List<PlayerRating> {
+    override fun reCalculateRatings(matches: List<MatchResult>) {
         currentRatings.clear()
         matches.forEach { updateRatingsAfterMatch(it) }
-        return getCurrentRatings()
     }
 
-    override fun getCurrentRatings() = currentRatings.values.sortedByDescending { it.rating }.toList()
+    override fun getCurrentRatings(keys: Set<UUID>?): List<PlayerRating> =
+            (keys ?: currentRatings.keys)
+                    .map { scoreFor(it) }
+                    .sortedByDescending { it.rating }
+                    .toList()
 
     fun expectationToWin(player1: Player, player2: Player) = expectationToWin(
             scoreFor(player1.identifier()), scoreFor(player2.identifier())
     )
 
-    fun updateRatingsAfterMatch(p1: PlayerRating, p2: PlayerRating, winner: UUID): Pair<PlayerRating, PlayerRating> {
+    private fun updateRatingsAfterMatch(p1: PlayerRating, p2: PlayerRating, winner: UUID): Pair<PlayerRating, PlayerRating> {
         val outcome = if (p1.playerId == winner) 1.0 else 0.0
         val delta = (K * (outcome - expectationToWin(p1, p2))).toInt()
         val newP1Rating = PlayerRating(p1.playerId, p1.rating + delta, delta.toDouble())

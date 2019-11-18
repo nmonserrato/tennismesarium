@@ -1,6 +1,7 @@
 package dev.paloma.tennismesarium.rating.elo
 
 import dev.paloma.tennismesarium.player.Player
+import dev.paloma.tennismesarium.rating.MatchResult
 import dev.paloma.tennismesarium.rating.PlayerRating
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -28,24 +29,26 @@ internal class EloTest {
 
     @Test
     internal fun `new score after expected win`() {
-        val p1 = PlayerRating(p1, 1700.0)
-        val p2 = PlayerRating(p2, 1300.0)
+        setupPlayersWithRating(1700.0, 1300.0)
 
-        val (newRating1, newRating2) = elo.updateRatingsAfterMatch(p1, p2, p1.playerId)
+        val match = MatchResult(p1, p2, p1)
+        elo.updateRatingsAfterMatch(match)
+        val newRatings = elo.getCurrentRatings()
 
-        assertEquals(1702.0, newRating1.rating)
-        assertEquals(1298.0, newRating2.rating)
+        assertEquals(1702.0, newRating(newRatings, p1))
+        assertEquals(1298.0, newRating(newRatings, p2))
     }
 
     @Test
     internal fun `new score after unexpected loss`() {
-        val p1 = PlayerRating(p1, 1700.0)
-        val p2 = PlayerRating(p2, 1300.0)
+        setupPlayersWithRating(1700.0, 1300.0)
 
-        val (newRating1, newRating2) = elo.updateRatingsAfterMatch(p1, p2, p2.playerId)
+        val match = MatchResult(p1, p2, p2)
+        elo.updateRatingsAfterMatch(match)
+        val newRatings = elo.getCurrentRatings()
 
-        assertEquals(1671.0, newRating1.rating)
-        assertEquals(1329.0, newRating2.rating)
+        assertEquals(1671.0, newRating(newRatings, p1))
+        assertEquals(1329.0, newRating(newRatings, p2))
     }
 
     private fun setupPlayersWithRating(rating1: Double, rating2: Double) {
@@ -56,6 +59,9 @@ internal class EloTest {
                 )
         )
     }
+
+    private fun newRating(newRatings: List<PlayerRating>, playerId: UUID?) =
+            newRatings.first { it.playerId == playerId }.rating
 
     private fun expectationToWin() =
             elo.expectationToWin(Player(p1, "p1"), Player(p2, "p2")).toFloat()

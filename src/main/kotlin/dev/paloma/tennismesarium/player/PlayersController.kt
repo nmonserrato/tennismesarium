@@ -33,8 +33,8 @@ class PlayersController {
     @GetMapping("ratings")
     fun getRatings(): ResponseEntity<List<PlayerWithRating>> {
         logger.info("Requested ratings of all players")
-        val ratings = ratingSystem.getCurrentRatings()
         val players = playersRepository.findAll().map { Pair(it.identifier(), it) }.toMap()
+        val ratings = ratingSystem.getCurrentRatings(players.keys)
 
         return ResponseEntity.ok(
                 ratings.map {

@@ -8,6 +8,8 @@
 <body>
 <h1>Welcome! <br />Here's the list of tournaments</h1>
 <div id="listTournamentsDiv"></div>
+<hr />
+<div id="ratingsDiv"></div>
 
 <script src="https://code.jquery.com/jquery-3.4.1.min.js"
         integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
@@ -15,7 +17,7 @@
 <script type="text/javascript">onIndex = true;</script>
 <script src="common.js"></script>
 <script type="application/javascript">
-        function tournamentToRow(t) {
+    function tournamentToRow(t) {
         var openLink;
         if (t.mode == 'SINGLE_ELIMINATION')
             openLink = '<a href="/brackets.html?id='+t.id+'">'+t.name+'</a>';
@@ -53,6 +55,31 @@
         });
     }
 
+    function ratingToRow(rec) {
+        return $('<tr>')
+            .append($('<td>').append(rec.name))
+            .append($('<td>').append(rec.rating))
+            .append($('<td>').append(rec.lastIncrement));
+    }
+
+    function loadRatings() {
+        $.getJSON( "/api/players/ratings", function( data ) {
+            $('#ratingsDiv').empty();
+            if(data.length > 0) {
+                var table = $('<table>').append($('<thead>').append(
+                    $('<tr>')
+                        .append($('<td>').append("Name"))
+                        .append($('<td>').append("Rating"))
+                        .append($('<td>').append("Last match"))
+                ));
+                for (i = 0; i < data.length; i++) {
+                    table.append($('<tbody>').append(ratingToRow(data[i])));
+                }
+                $('#ratingsDiv').append(table);
+            }
+        });
+    }
+
     function deleteTournament(tournamentId) {
         if (confirm("Are ou sure you want to delete this tournament?")) {
             $.ajax({
@@ -70,6 +97,7 @@
 
 
     loadAvailableTournaments();
+    loadRatings();
 </script>
 </body>
 </html>
