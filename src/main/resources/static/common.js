@@ -41,7 +41,7 @@ if (window.location.href.indexOf("tree.html") !== -1) {
     alternativeView = window.location.href.replace("brackets.html", "tree.html");
 }
 
-if (window.location.href.indexOf("index.html") === -1) {
+if (typeof onIndex === 'undefined') {
     $('<a href="index.html" style="position: absolute;left: 0; top: 0; display: block; margin: 20px 0px 0px 30px;">Back to home</a>').appendTo(document.body);
 }
 
