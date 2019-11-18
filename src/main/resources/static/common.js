@@ -21,6 +21,38 @@ function submitMatchResult(matchId, winnerId, playerName) {
     }
 }
 
+function ratingToRow(rec) {
+    if (rec.lastIncrement > 0)
+        incrSpan = '<span class="positiveDelta">&#43;' + rec.lastIncrement + '</span>';
+    else if (rec.lastIncrement < 0)
+        incrSpan = '<span class="negativeDelta">' + rec.lastIncrement + '</span>';
+    else
+        incrSpan = '<span>'+rec.lastIncrement+'</span>';
+
+    return $('<tr>')
+        .append($('<td>').append(rec.name))
+        .append($('<td>').append(rec.rating))
+        .append($('<td>').append(incrSpan));
+}
+
+function loadRatings() {
+    $.getJSON( "/api/players/ratings", function( data ) {
+        $('#ratingsDiv').empty();
+        if(data.length > 0) {
+            var table = $('<table>').append($('<thead>').append(
+                $('<tr>')
+                    .append($('<td>').append("Name"))
+                    .append($('<td>').append("Rating"))
+                    .append($('<td>').append("Last match"))
+            ));
+            for (i = 0; i < data.length; i++) {
+                table.append($('<tbody>').append(ratingToRow(data[i])));
+            }
+            $('#ratingsDiv').append(table);
+        }
+    });
+}
+
 function readOnly() {
     if (typeof urlParam('rw') !== 'undefined') return;
     $(".withPointer").removeClass('withPointer')

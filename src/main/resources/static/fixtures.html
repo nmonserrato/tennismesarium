@@ -12,13 +12,18 @@
     <div id="tournamentWinnerName" class="sub-header"></div>
     <input type="hidden" id="tournamentIdInput" />
 
-    <div class="bracket-container">
+    <div class="bracket-container" style="float: left;">
         <h3 id="roundTitleHeader"></h3>
         <div id="selectedRoundNavigatorDiv"></div>
         <div id="currentRoundDiv"></div>
-        <hr />
-        <h3>Tables</h3>
+        <br />
+        <h3>Tournament Table</h3>
         <div id="tablesDiv"></div>
+    </div>
+
+    <div id="ratingsContent" style="float: left; margin-left: 100px">
+        <h3>Player ratings</h3>
+        <div id="ratingsDiv"> </div>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"
@@ -135,6 +140,7 @@
             $.getJSON( "/api/tournament/"+tournamentId, function( data ) {
                 drawInfoAndRounds(data);
             });
+            loadRatings();
         }
 
         reloadTree();
