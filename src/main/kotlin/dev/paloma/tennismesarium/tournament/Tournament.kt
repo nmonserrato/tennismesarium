@@ -43,7 +43,7 @@ sealed class Tournament (
         }
 
         fun createFixtures(tournamentName: String, players: List<Player>): Tournament {
-            return RoundRobinTournament.generateRounds(tournamentName, players.shuffled())
+            return RoundRobinTournament.generateRounds(tournamentName, players.shuffled(), false)
         }
 
         fun fromJson(json: Map<String, Any>): Tournament {
@@ -123,7 +123,7 @@ class RoundRobinTournament private constructor(
     }
 
     companion object {
-        fun generateRounds(name: String, players: List<Player>): RoundRobinTournament {
+        fun generateRounds(name: String, players: List<Player>, homeAndAway: Boolean): RoundRobinTournament {
             val fakePlayer = Player(UUID.randomUUID(), "Fake")
             val simulationPlayers = players.toMutableList()
             if(players.size % 2 == 1) simulationPlayers.add(fakePlayer)
@@ -149,14 +149,16 @@ class RoundRobinTournament private constructor(
                 arrayOfPlayers[1] = lastPlayer
             }
 
-            // away
-            for (r in numOfRounds / 2 until numOfRounds) {
-                val homeMatches = rounds[r - numOfRounds / 2].findPlayableMatches()
-                val matchesOfRound = ArrayList<Match>(numOfMatchesPerRound)
-                for (m in homeMatches) {
-                    matchesOfRound.add(Match.between(m.players()[1], m.players()[0]))
+            if (homeAndAway) {
+                // away
+                for (r in numOfRounds / 2 until numOfRounds) {
+                    val homeMatches = rounds[r - numOfRounds / 2].findPlayableMatches()
+                    val matchesOfRound = ArrayList<Match>(numOfMatchesPerRound)
+                    for (m in homeMatches) {
+                        matchesOfRound.add(Match.between(m.players()[1], m.players()[0]))
+                    }
+                    rounds.add(RoundRobinRound(r + 1, matchesOfRound))
                 }
-                rounds.add(RoundRobinRound(r + 1, matchesOfRound))
             }
 
             return RoundRobinTournament(id = UUID.randomUUID(), name = name, rounds = rounds)

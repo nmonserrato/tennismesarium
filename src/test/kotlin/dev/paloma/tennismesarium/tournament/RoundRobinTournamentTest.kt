@@ -11,7 +11,7 @@ internal class RoundRobinTournamentTest {
     fun tournamentWithFourPlayers() {
         val players = players("Nino", "Diego", "Germanno", "Alejandro")
 
-        val tournament = RoundRobinTournament.generateRounds("Test Name", players)
+        val tournament = RoundRobinTournament.generateRounds("Test Name", players, true)
         val rounds = tournament.toJson()["rounds"] as List<Map<String, Any>>
 
         assertEquals(tournament.name, "Test Name")
@@ -22,14 +22,30 @@ internal class RoundRobinTournamentTest {
         assertThatRoundGamesWere(rounds[3], listOf(listOf("Alejandro", "Nino"), listOf("Germanno", "Diego")))
         assertThatRoundGamesWere(rounds[4], listOf(listOf("Germanno", "Nino"), listOf("Diego", "Alejandro")))
         assertThatRoundGamesWere(rounds[5], listOf(listOf("Diego", "Nino"), listOf("Alejandro", "Germanno")))
-        verifyThatEachPlayersPlayedAgainstEachOtherTwice(rounds, players)
+        verifyThatEachPlayersPlayedAgainstEachOther(rounds, players, 2)
+    }
+
+    @Test
+    fun tournamentWithFourPlayersAndNoReturnMatches() {
+        val players = players("Nino", "Diego", "Germanno", "Alejandro")
+
+        val tournament = RoundRobinTournament.generateRounds("Test Name", players, false)
+        val rounds = tournament.toJson()["rounds"] as List<Map<String, Any>>
+
+        assertEquals(tournament.name, "Test Name")
+
+        assertEquals(3, rounds.size)
+        assertThatRoundGamesWere(rounds[0], listOf(listOf("Nino", "Alejandro"), listOf("Diego", "Germanno")))
+        assertThatRoundGamesWere(rounds[1], listOf(listOf("Nino", "Germanno"), listOf("Alejandro", "Diego")))
+        assertThatRoundGamesWere(rounds[2], listOf(listOf("Nino", "Diego"), listOf("Germanno", "Alejandro")))
+        verifyThatEachPlayersPlayedAgainstEachOther(rounds, players, 1)
     }
 
     @Test
     fun tournamentWithFivePlayers() {
         val players = players("A", "B", "C", "D", "E")
 
-        val tournament = RoundRobinTournament.generateRounds("Test Name", players)
+        val tournament = RoundRobinTournament.generateRounds("Test Name", players, true)
         val rounds = tournament.toJson()["rounds"] as List<Map<String, Any>>
 
         assertEquals(tournament.name, "Test Name")
@@ -45,15 +61,15 @@ internal class RoundRobinTournamentTest {
     fun tournamentWith20Players() {
         val players = (1..20).map { Player(UUID.randomUUID(), "p$it") }.toList()
 
-        val tournament = RoundRobinTournament.generateRounds("Test Name", players)
+        val tournament = RoundRobinTournament.generateRounds("Test Name", players, true)
         val rounds = tournament.toJson()["rounds"] as List<Map<String, Any>>
 
         assertEquals(tournament.name, "Test Name")
         assertEquals(38, rounds.size)
-        verifyThatEachPlayersPlayedAgainstEachOtherTwice(rounds, players)
+        verifyThatEachPlayersPlayedAgainstEachOther(rounds, players, 2)
     }
 
-    private fun verifyThatEachPlayersPlayedAgainstEachOtherTwice(rounds: List<Map<String, Any>>, players: List<Player>) {
+    private fun verifyThatEachPlayersPlayedAgainstEachOther(rounds: List<Map<String, Any>>, players: List<Player>, times: Int) {
         val groupedMatched = rounds
                 .flatMap { it["matches"] as List<Map<String, Any>> }
                 .asSequence()
@@ -69,7 +85,7 @@ internal class RoundRobinTournamentTest {
                 if (p1 == p2)
                     continue
                 else
-                    assertEquals(2, groupedMatched.getOrElse("$p1 $p2", { groupedMatched["$p2 $p1"] }))
+                    assertEquals(times, groupedMatched.getOrElse("$p1 $p2", { groupedMatched["$p2 $p1"] }))
             }
         }
     }
