@@ -75,8 +75,8 @@
                 var p1Text = p1.name;
                 var p2Text = p2.name;
                 if (match.canBePlayed) {
-                    p1Text = '<a href="#" onclick="submitMatchResult(\''+match.id+'\',\''+p1.id+'\',\''+p1.name+'\');return false;">'+p1.name+'</a>';
-                    p2Text = '<a href="#" onclick="submitMatchResult(\''+match.id+'\',\''+p2.id+'\',\''+p2.name+'\');return false;">'+p2.name+'</a>';
+                    p1Text = '<a href="#" class="cta" onclick="submitMatchResult(\''+match.id+'\',\''+p1.id+'\',\''+p1.name+'\');return false;">'+p1.name+'</a>';
+                    p2Text = '<a href="#" class="cta" onclick="submitMatchResult(\''+match.id+'\',\''+p2.id+'\',\''+p2.name+'\');return false;">'+p2.name+'</a>';
                 } else {
                     if (p1.id == match.winner.id)
                         p1Text = "<b>"+p1.name+"</b>";

@@ -66,10 +66,10 @@
                 }
             }
             return baseDiv
-                        .append($('<div class="bracket-team '+team1Class+' '+(clickable?'withPointer':'')+'" '+submitLink1+'>')
+                        .append($('<div class="bracket-team cta '+team1Class+' '+(clickable?'withPointer':'')+'" '+submitLink1+'>')
                                     .append($('<div class="bracket-name">').append(team1))
                                     .append($('<div class="bracket-score">').append(scoreFor(team1Class))))
-                        .append($('<div class="bracket-team '+team2Class+' '+(clickable?'withPointer':'')+'" '+submitLink2+'>')
+                        .append($('<div class="bracket-team cta '+team2Class+' '+(clickable?'withPointer':'')+'" '+submitLink2+'>')
                                     .append($('<div class="bracket-name">').append(team2))
                                     .append($('<div class="bracket-score">').append(scoreFor(team2Class))));
         }

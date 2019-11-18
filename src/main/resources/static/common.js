@@ -23,9 +23,12 @@ function submitMatchResult(matchId, winnerId, playerName) {
 
 function readOnly() {
     if (typeof urlParam('rw') !== 'undefined') return;
-    $(".withPointer").prop('onclick', null);
-    $("a").prop('onclick', null);
-    $("img").prop('onclick', null);
+    $(".withPointer").removeClass('withPointer')
+    $(".cta").prop('onclick', null);
+    $("a.cta").each(function( index ) {
+        var content = $(this).text()
+        $(this).replaceWith(content);
+    });
 }
 
 var alternativeView;

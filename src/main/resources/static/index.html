@@ -20,7 +20,7 @@
             openLink = '<a href="/brackets.html?id='+t.id+'">'+t.name+'</a>';
         else
             openLink = '<a href="/fixtures.html?id='+t.id+'">'+t.name+'</a>';
-        var deleteImg = '<img src="delete.png" onclick="deleteTournament(\''+t.id+'\')" '+
+        var deleteImg = '<img src="delete.png" class="cta" onclick="deleteTournament(\''+t.id+'\')" '+
             'width="16" height="16" onmouseover="" style="cursor: pointer;"/>';
 
         return $('<tr>')

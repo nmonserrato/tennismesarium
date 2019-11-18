@@ -31,8 +31,8 @@
             var p1 = match.players[0];
             var p2 = match.players[1];
             if (match.canBePlayed) {
-                nodeText = '<a href="#" onclick="submitMatchResult(\''+match.id+'\',\''+p1.id+'\',\''+p1.name+'\');return false;">'+p1.name+'</a> vs '+
-                           '<a href="#" onclick="submitMatchResult(\''+match.id+'\',\''+p2.id+'\',\''+p2.name+'\');return false;">'+p2.name+'</a>';
+                nodeText = '<a href="#" class="cta" onclick="submitMatchResult(\''+match.id+'\',\''+p1.id+'\',\''+p1.name+'\');return false;">'+p1.name+'</a> vs '+
+                           '<a href="#" class="cta" onclick="submitMatchResult(\''+match.id+'\',\''+p2.id+'\',\''+p2.name+'\');return false;">'+p2.name+'</a>';
             } else {
                 nodeText = p1.name +' vs '+ p2.name
             }
