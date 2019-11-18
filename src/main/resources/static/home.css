@@ -11,3 +11,11 @@ thead {
 a {
     text-decoration: none;
 }
+
+.positiveDelta {
+    color: green;
+}
+
+.negativeDelta {
+    color: red;
+}

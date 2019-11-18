@@ -52,7 +52,7 @@ class Elo : RatingSystem {
         val outcome = if (p1.playerId == winner) 1.0 else 0.0
         val delta = (K * (outcome - expectationToWin(p1, p2))).toInt()
         val newP1Rating = PlayerRating(p1.playerId, p1.rating + delta, delta.toDouble())
-        val newP2Rating = PlayerRating(p2.playerId, p2.rating - delta, delta.toDouble())
+        val newP2Rating = PlayerRating(p2.playerId, p2.rating - delta, (-delta).toDouble())
         return Pair(newP1Rating, newP2Rating)
     }
 

@@ -9,6 +9,7 @@
 <h1>Welcome! <br />Here's the list of tournaments</h1>
 <div id="listTournamentsDiv"></div>
 <hr />
+<h1>Players ratings</h1>
 <div id="ratingsDiv"></div>
 
 <script src="https://code.jquery.com/jquery-3.4.1.min.js"
@@ -56,10 +57,17 @@
     }
 
     function ratingToRow(rec) {
+        if (rec.lastIncrement > 0)
+            incrSpan = '<span class="positiveDelta">&#43;' + rec.lastIncrement + '</span>';
+        else if (rec.lastIncrement < 0)
+            incrSpan = '<span class="negativeDelta">' + rec.lastIncrement + '</span>';
+         else
+            incrSpan = '<span>'+rec.lastIncrement+'</span>';
+
         return $('<tr>')
             .append($('<td>').append(rec.name))
             .append($('<td>').append(rec.rating))
-            .append($('<td>').append(rec.lastIncrement));
+            .append($('<td>').append(incrSpan));
     }
 
     function loadRatings() {
