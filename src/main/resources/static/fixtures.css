@@ -60,3 +60,9 @@ a {
 .negativeDelta {
     color: red;
 }
+
+.expectation {
+    font-size: small;
+    color: gray;
+    margin-left: 5px;
+}

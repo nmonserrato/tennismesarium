@@ -58,7 +58,7 @@ function readOnly() {
     $(".withPointer").removeClass('withPointer')
     $(".cta").prop('onclick', null);
     $("a.cta").each(function( index ) {
-        var content = $(this).text()
+        var content = $(this).html()
         $(this).replaceWith(content);
     });
 }

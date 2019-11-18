@@ -79,9 +79,17 @@
                 var p2 = match.players[1];
                 var p1Text = p1.name;
                 var p2Text = p2.name;
+                if (typeof match.expectation !== 'undefined') {
+                    expect1 = '<span class="expectation">('+match.expectation+'&#37;)</span>';
+                    expect2 = '<span class="expectation">('+(100-match.expectation)+'&#37;)</span>';
+                } else {
+                    expect1 = '';
+                    expect2 = '';
+                }
+
                 if (match.canBePlayed) {
-                    p1Text = '<a href="#" class="cta" onclick="submitMatchResult(\''+match.id+'\',\''+p1.id+'\',\''+p1.name+'\');return false;">'+p1.name+'</a>';
-                    p2Text = '<a href="#" class="cta" onclick="submitMatchResult(\''+match.id+'\',\''+p2.id+'\',\''+p2.name+'\');return false;">'+p2.name+'</a>';
+                    p1Text = '<a href="#" class="cta" onclick="submitMatchResult(\''+match.id+'\',\''+p1.id+'\',\''+p1.name+'\');return false;">'+p1.name+expect1+'</a>';
+                    p2Text = '<a href="#" class="cta" onclick="submitMatchResult(\''+match.id+'\',\''+p2.id+'\',\''+p2.name+'\');return false;">'+p2.name+expect2+'</a>';
                 } else {
                     if (p1.id == match.winner.id)
                         p1Text = "<b>"+p1.name+"</b>";
