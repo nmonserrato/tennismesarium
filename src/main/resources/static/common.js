@@ -29,8 +29,14 @@ function ratingToRow(rec) {
     else
         incrSpan = '<span>'+rec.lastIncrement+'</span>';
 
+    var name = rec.name;
+    if (typeof rec.slackId !== 'undefined') && rec.slackId !== "") {
+        name = '<a target="_blank" href="https://n26.slack.com/team/'+rec.slackId+'">' + rec.name + '</a>";
+    }
+
+
     return $('<tr>')
-        .append($('<td>').append(rec.name))
+        .append($('<td>').append(name))
         .append($('<td>').append(rec.rating))
         .append($('<td>').append(incrSpan));
 }

@@ -40,6 +40,7 @@ class PlayersController {
                 ratings.map {
                     PlayerWithRating(
                             players[it.playerId].toString(),
+                            players[it.playerId]?.slackId ?: "",
                             it.rating,
                             it.lastIncrement)
                 }
@@ -57,5 +58,6 @@ class PlayersController {
 
 data class PlayerWithRating (
         val name: String,
+        val slackId: String,
         val rating: Double,
         val lastIncrement: Double)
