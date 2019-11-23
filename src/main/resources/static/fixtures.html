@@ -60,7 +60,6 @@
             var previousLink = $('<button onclick="showPreviousRound()">&laquo;</button>');
             var nextLink = $('<button onclick="showNextRound()">&raquo;</button>');
             var currentLink = $('<button onclick="showCurrentRound()">current</button>');
-            var skipLink = 'vs';
 
             previousLink.prop( "disabled", selectedRound <= 0 )
             nextLink.prop( "disabled", selectedRound >= (totalRounds-1) )
@@ -89,6 +88,7 @@
                     expect2 = '';
                 }
 
+                var skipLink = 'vs';
                 if (match.canBePlayed) {
                     p1Text = '<a href="#" class="cta" onclick="submitMatchResult(\''+match.id+'\',\''+p1.id+'\',\''+p1.name+'\');return false;">'+p1.name+expect1+'</a>';
                     p2Text = '<a href="#" class="cta" onclick="submitMatchResult(\''+match.id+'\',\''+p2.id+'\',\''+p2.name+'\');return false;">'+p2.name+expect2+'</a>';
