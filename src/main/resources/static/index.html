@@ -10,6 +10,13 @@
 <h1>Welcome! <br />Here's the list of tournaments</h1>
 <div id="listTournamentsDiv"></div>
 <br />
+<h1>Want to record the result of a single match?</h1>
+<select id="player1List" onchange="updateWinnersList()"> </select> vs
+<select id="player2List" onchange="updateWinnersList()"> </select> ->
+Winner <select id="winnerList"> </select>
+<br /> <br />
+<button id="submitSingleMatchButton" disabled="disabled" type="button" onclick="submitNewMatch()">Submit</button>
+<br />
 <h1>Players ratings</h1>
 <div id="ratingsDiv"></div>
 
@@ -72,9 +79,73 @@
         }
     }
 
+    function preloadPlayers() {
+        $.getJSON( "/api/players/available", function( data ) {
+            $('#player1List').empty();
+            $('#player2List').empty();
+            $('#winnerList').empty();
+            if(data.length > 0) {
+                for (i = 0; i < data.length; i++) {
+                    var p = data[i];
+                    $('#player1List').append('<option value="'+p.id+'">'+p.name+'</option>')
+                    $('#player2List').append('<option value="'+p.id+'">'+p.name+'</option>')
+                }
+            }
+        });
+    }
+
+    function updateWinnersList() {
+        var p1Text = $('#player1List option:selected').text()
+        var p1Val = $('#player1List option:selected').val()
+        var p2Text = $('#player2List option:selected').text()
+        var p2Val = $('#player2List option:selected').val()
+        $('#winnerList').empty()
+        $('#submitSingleMatchButton').attr("disabled","disabled");
+        if (p1Val !== p2Val) {
+            $("#winnerList").append('<option value="'+p1Val+'">'+p1Text+'</option>');
+            $("#winnerList").append('<option value="'+p2Val+'">'+p2Text+'</option>');
+            $('#submitSingleMatchButton').removeAttr("disabled");
+        }
+    }
+
+    function submitNewMatch() {
+        var p1Val = $('#player1List option:selected').val()
+        var p2Val = $('#player2List option:selected').val()
+        var winnerVal = $('#winnerList option:selected').val()
+        var winnerText = $('#winnerList option:selected').text()
+
+        if (p1Val === p2Val) {
+            alert("Seriously ?!?");
+            return;
+        }
+
+        if (winnerVal !== p1Val && winnerVal !== p2Val) {
+            alert("Wat ?!?");
+            return;
+        }
+
+        if (confirm("Do you confirm that "+winnerText+" won the match?")) {
+            var postData = { "player1" : p1Val, "player2": p2Val, "winnerId": winnerVal}
+            $.ajax({
+                type: "POST",
+                url: "/api/match/played",
+                data: JSON.stringify(postData),
+                success: function (data, textStatus, jqXHR) {
+                    loadRatings();
+                },
+                error: function (request, textStatus) {
+                    alert('There was an error :(  Try again in a bit.');
+                },
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                traditional: true
+            });
+        }
+    }
 
     loadAvailableTournaments();
     loadRatings();
+    preloadPlayers();
 </script>
 </body>
 </html>
