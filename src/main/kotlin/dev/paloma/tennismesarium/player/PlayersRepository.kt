@@ -53,7 +53,8 @@ object PlayerRowMapper : RowMapper<Player> {
     override fun mapRow(rs: ResultSet, i: Int): Player {
         val id = UUID.fromString(rs.getString(1))
         val name = rs.getString(2)
-        return Player(id, name)
+        val slackId: String? = rs.getString(3)
+        return Player(id, name, slackId)
     }
 
 }
