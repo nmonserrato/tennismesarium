@@ -31,7 +31,7 @@ function ratingToRow(rec) {
 
     var name = rec.name;
     if (typeof rec.slackId !== 'undefined') && rec.slackId !== "") {
-        name = '<a target="_blank" href="https://n26.slack.com/team/'+rec.slackId+'">' + rec.name + '</a>";
+        name = '<a target="_blank" href="https://n26.slack.com/team/'+rec.slackId+'">' + rec.name + '</a>';
     }
 
 
