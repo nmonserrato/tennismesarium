@@ -91,6 +91,9 @@
                 if (match.canBePlayed) {
                     p1Text = '<a href="#" class="cta" onclick="submitMatchResult(\''+match.id+'\',\''+p1.id+'\',\''+p1.name+'\');return false;">'+p1.name+expect1+'</a>';
                     p2Text = '<a href="#" class="cta" onclick="submitMatchResult(\''+match.id+'\',\''+p2.id+'\',\''+p2.name+'\');return false;">'+p2.name+expect2+'</a>';
+                } else if (match.skipped) {
+                    p1Text = "<s>"+p1.name+"</s>";
+                    p2Text = "<s>"+p2.name+"</s>";
                 } else {
                     if (p1.id == match.winner.id)
                         p1Text = "<b>"+p1.name+"</b>";
@@ -99,7 +102,8 @@
                 }
 
                 var tr = $('<tr>')
-                tr.append('<td>'+p1Text+'</td><td>vs</td><td>'+p2Text+'</td>');
+                var skipLink = '<span class="cta" onclick="skipMatch(\''+match.id+'\');return false;">vs</span>';
+                tr.append('<td>'+p1Text+'</td><td>'+skipLink+'</td><td>'+p2Text+'</td>');
                 tbody.append(tr);
             }
 

@@ -43,15 +43,18 @@ class MatchController {
         val match = tournament.findPlayableMatch(matchId)
                 ?: throw IllegalArgumentException("No match $matchId found in tournament")
 
-        match.complete(request.winnerId)
-        matchResultsRepository.storeMatchResult(match)
+        if (request.winnerId == null) {
+            match.skip()
+        } else {
+            match.complete(request.winnerId)
+            matchResultsRepository.storeMatchResult(match)
+            ratingSystem.updateRatingsAfterMatch(match.result())
+        }
 
         tournament.onMatchCompleted()
         tournamentRepository.store(tournament)
 
-        ratingSystem.updateRatingsAfterMatch(match.result())
-
-        logger.info("Match {} played and tournament {} updated", matchId, request.tournamentId)
+        logger.info("Match {} completed and tournament {} updated", matchId, request.tournamentId)
         return ResponseEntity.accepted().build()
     }
 
@@ -69,7 +72,6 @@ class MatchController {
         )
         match.complete(request.winnerId)
         matchResultsRepository.storeMatchResult(match)
-
         ratingSystem.updateRatingsAfterMatch(match.result())
 
         logger.info("Match {} saved and rankings updated", match.toString())
@@ -79,7 +81,7 @@ class MatchController {
 
 data class MatchCompletionRequest(
         @NotNull val tournamentId: UUID,
-        @NotNull val winnerId: UUID
+        val winnerId: UUID?
 )
 
 data class CreateCompletedMatchRequest(

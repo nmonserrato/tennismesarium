@@ -21,6 +21,24 @@ function submitMatchResult(matchId, winnerId, playerName) {
     }
 }
 
+function skipMatch(matchId) {
+    if(confirm("Do you confirm that you want to skip this match?")) {
+        var tournamentId = document.getElementById("tournamentIdInput").value;
+        var postData = { "tournamentId" : tournamentId, "winnerId": null}
+        $.ajax({
+            type: "PUT",
+            url: "/api/match/"+matchId,
+            data: JSON.stringify(postData),
+            complete: function (request, textStatus) {
+                reloadTree();
+            },
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            traditional: true
+        });
+    }
+}
+
 function ratingToRow(rec) {
     if (rec.lastIncrement > 0)
         incrSpan = '<span class="positiveDelta">&#43;' + rec.lastIncrement + '</span>';

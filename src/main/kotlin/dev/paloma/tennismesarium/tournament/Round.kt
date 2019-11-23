@@ -172,7 +172,7 @@ class RoundRobinRound(
 
     override fun findPlayableMatches() = games.filter { !it.isCompleted() }
 
-    fun findPlayedMatches() = games.filter { it.isCompleted() }
+    fun findPlayedMatches() = games.filter { it.hasBeenPlayed() }
 
     fun findPlayers() = games.flatMap { it.players() }.map { it.toString() }.toSet()
 }

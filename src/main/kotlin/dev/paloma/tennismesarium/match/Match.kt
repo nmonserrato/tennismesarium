@@ -11,6 +11,8 @@ sealed class Match {
     abstract fun identifier(): UUID
     abstract fun toJson(): Map<String, Any>
     abstract fun complete(winnerId: UUID)
+    abstract fun skip()
+    abstract fun hasBeenPlayed(): Boolean
     abstract fun isCompleted(): Boolean
     abstract fun winner(): Player
     abstract fun players(): List<Player>
@@ -30,7 +32,8 @@ sealed class Match {
 class SinglesMatch(
         private val id: UUID,
         private val players: Pair<Player, Player>,
-        private var winner: Player?) : Match() {
+        private var winner: Player?,
+        private var skipped: Boolean = false) : Match() {
     companion object {
         fun between(player1: Player, player2: Player): SinglesMatch {
             return SinglesMatch(UUID.randomUUID(), Pair(player1, player2), null)
@@ -40,7 +43,8 @@ class SinglesMatch(
             val id = UUID.fromString(json["id"] as String)
             val players = (json["players"] as List<Map<String, Any>>).map { Player.fromJSON(it) }.zipWithNext().first()
             val winner = json["winner"]?.let { Player.fromJSON(it as  Map<String, Any>) }
-            return SinglesMatch(id, players, winner)
+            val skipped = (json["skipped"] as Boolean?) ?: false
+            return SinglesMatch(id, players, winner, skipped)
         }
     }
 
@@ -55,15 +59,24 @@ class SinglesMatch(
         output["id"] = id.toString()
         output["players"] = listOf(players.first.toJson(), players.second.toJson())
         output["canBePlayed"] = !isCompleted()
+        output["skipped"] = skipped
         if (!isCompleted()) output["expectation"] =
                 RatingSystem.elo().expectationToWin(players.first, players.second).times(100).toInt()
         winner?.let { output["winner"] = it.toJson() }
         return output
     }
 
-    override fun isCompleted() = (winner != null)
+    override fun isCompleted() = (winner != null) || skipped
+    override fun hasBeenPlayed() = (winner != null)
 
-    override fun winner() = winner ?: throw IllegalStateException("Match $id has not been played")
+    override fun winner() = winner ?: throw IllegalStateException("Match $id has no winner")
+
+    override fun skip() {
+        if (isCompleted())
+            throw IllegalStateException("Match was already completed")
+
+        skipped = true
+    }
 
     override fun complete(winnerId: UUID) {
         when (winnerId) {
